@@ -1,0 +1,51 @@
+﻿{
+	"manifest_version": 3,
+	"name": "Pax",
+	"version": "1.0.0",
+	"description": "In Roman mythology, Pax is the goddess of peace. Pax was responsible for establishing a state of harmony. And so is this extension, which changes some styles and adds some elements to make life easier for those with additional permissions on Lichess. For regular users, the extension won't be as useful since the only feature available to them is chat enhancement.",
+	"icons": {
+		"112": "icons/pax-112.png"
+	},
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "pax@lichess.org",
+			"strict_min_version": "58.0"
+		}
+	},
+	"permissions": [
+		"activeTab",
+		"storage"
+	],
+	"content_scripts": [
+		{
+			"matches": [ "*://lichess.org/@/*",
+			             "*://lichess.dev/@/*",
+			             "*://lichess.org/mod/*/communication",
+			             "*://lichess.dev/mod/*/communication"],
+			"js": [ "jquery.min.js", "modlog.js" ],
+			"run_at": "document_end"
+		},
+		{
+			"matches": [ "*://lichess.org/mod/*/communication/private",
+			             "*://lichess.dev/mod/*/communication/private"],
+			"js": [ "jquery.min.js", "modlog.js", "comms_private.js" ],
+			"run_at": "document_end"
+		},
+		{
+			"matches": [ "*://lichess.org/appeal/*",
+			             "*://lichess.dev/appeal/*"],
+			"js": [ "jquery.min.js", "appeal.js" ],
+			"run_at": "document_end"
+		},
+		{
+			"matches": [ "*://lichess.org/tournament/*",
+			             "*://lichess.dev/tournament/*",
+			             "*://lichess.org/swiss/*",
+			             "*://lichess.dev/swiss/*",
+			             "*://lichess.org/broadcast/*",
+			             "*://lichess.dev/broadcast/*"],
+			"js": [ "jquery.min.js", "chat.js" ],
+			"run_at": "document_end"
+		}
+	]
+}
