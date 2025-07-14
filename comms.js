@@ -9,13 +9,13 @@ const num_priv_msgs = $('.post').length;
 const num_priv_msgs_author = $('.post.author').length;
 const buttons_style = 'style="background: var(--c-secondary); color: #fff; border-bottom-width: 0; border-top-width: 0; text-shadow: 0 1px 1px #000 !important;"';
 let btns_chat = [];
-if (num_chat_msgs) {
+if (num_chat_msgs - num_chat_msgs_author) {
     const text_msgs = `Others' msgs: ${num_chat_msgs - num_chat_msgs_author} of ${num_chat_msgs}`;
     btns_chat.push(`<button id="pax-only-author-msgs" class="btn-rack__btn" ${buttons_style}>${text_msgs}</button>`);
 }
 btns_chat.push(`<button id="pax-scrollbars-chat" class="btn-rack__btn" ${buttons_style}>Scrollbars</button>`);
 let btns_priv = [];
-if (num_priv_msgs) {
+if (num_priv_msgs - num_priv_msgs_author) {
     const text_msgs = `Others' msgs: ${num_priv_msgs - num_priv_msgs_author} of ${num_priv_msgs}`;
     btns_priv.push(`<button id="pax-only-author-posts" class="btn-rack__btn" ${buttons_style}>${text_msgs}</button>`);
 }
@@ -102,13 +102,18 @@ $('#pax-team-msgs').click(hide_team_msgs);
 $('#pax-only-author-posts').click(show_only_author_posts);
 $('#pax-only-author-msgs').click(show_only_author_msgs);
 scrollbars_priv();
+let max_len_chat = 0;
+$('.game').each(function(i, o) {
+    let len = $(this).find('.line').length;
+    if(len > max_len_chat)
+        max_len_chat = len;
+});
+if (max_len_chat < 40)
+    scrollbars_chat();
 if (num_team_msgs_others || num_team_msgs_author)
-	hide_team_msgs();
+    hide_team_msgs();
 
 if (!$('#pax-modlog-info').length) {
     add_modlog_info();
     add_modlog_buttons();
 }
-
-if (CSS.highlights)
-    CSS.highlights.clear();

@@ -42,7 +42,7 @@ function reload_chat_msgs() {
 }
 
 var is_chat_initialized = false;
-const config = { attributes: false, childList: true, subtree: true };
+const config_chat = { attributes: false, childList: true, subtree: true };
 const chat_callback = (mutationList, observer) => {
     for (const mutation of mutationList) {
         if (mutation.type === "childList") {
@@ -63,4 +63,4 @@ const chat_callback = (mutationList, observer) => {
     }
 };
 const chat_observer = new MutationObserver(chat_callback);
-chat_observer.observe(document, config);
+chat_observer.observe(document, config_chat);

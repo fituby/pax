@@ -256,7 +256,7 @@ function split_presets() {
     //$('.pm-preset:not(.pm-preset-msg) option:contains("Send PM")').text("WARN");
 }
 
-const config = { attributes: false, childList: true, subtree: false };
+const config_modlog = { attributes: false, childList: true, subtree: false };
 const mod_zone_callback = (mutationList, observer) => {
     modlog_items = {};
 	for (const mutation of mutationList) {
@@ -276,10 +276,10 @@ const mod_zone_callback = (mutationList, observer) => {
 		}
 	}
 };
-const observer = new MutationObserver(mod_zone_callback);
+const observer_modlog = new MutationObserver(mod_zone_callback);
 $('.mod-zone').each(function(i, o) {
     if ($(this).is('.none'))
-        observer.observe(o, config);
+        observer_modlog.observe(o, config_modlog);
     else {
         if (!$('#pax-modlog-info').length) {
             add_modlog_info();

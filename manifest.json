@@ -1,10 +1,15 @@
 ﻿{
 	"manifest_version": 3,
 	"name": "Pax",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "In Roman mythology, Pax is the goddess of peace. Pax was responsible for establishing a state of harmony. And so is this extension, which changes some styles and adds some elements to make life easier for those with additional permissions on Lichess. For regular users, the extension won't be as useful since the only feature available to them is chat enhancement.",
 	"icons": {
-		"112": "icons/pax-112.png"
+		"32": "icons/pax-32.png",
+		"48": "icons/pax-48.png",
+		"64": "icons/pax-64.png",
+		"96": "icons/pax-96.png",
+		"112": "icons/pax-112.png",
+		"128": "icons/pax-128.png"
 	},
 	"browser_specific_settings": {
 		"gecko": {
@@ -28,13 +33,13 @@
 		{
 			"matches": [ "*://lichess.org/mod/*/communication/private",
 			             "*://lichess.dev/mod/*/communication/private"],
-			"js": [ "jquery.min.js", "modlog.js", "comms_private.js" ],
+			"js": [ "jquery.min.js", "modlog.js", "comms.js", "highlights.js" ],
 			"run_at": "document_end"
 		},
 		{
 			"matches": [ "*://lichess.org/appeal/*",
 			             "*://lichess.dev/appeal/*"],
-			"js": [ "jquery.min.js", "appeal.js" ],
+			"js": [ "jquery.min.js", "appeal.js", "highlights.js" ],
 			"run_at": "document_end"
 		},
 		{
