@@ -250,10 +250,10 @@ function split_presets() {
         return;
     $('.pm-preset').clone(true).addClass('pm-preset-warn').insertAfter('.pm-preset');
     $('.pm-preset-warn option').remove();
-    $('<option value="">WARN</option>').appendTo('.pm-preset-warn select');
+    $('<option value="">Warn</option>').appendTo('.pm-preset-warn select');
     $('.pm-preset:not(.pm-preset-warn) option:contains("Warning")').appendTo('.pm-preset-warn select');
     //$('option:not(:contains("Warning: "))+option:not(:contains("Send PM"))').remove();
-    //$('.pm-preset:not(.pm-preset-msg) option:contains("Send PM")').text("WARN");
+    //$('.pm-preset:not(.pm-preset-msg) option:contains("Send PM")').text("Warn");
 }
 
 const config_modlog = { attributes: false, childList: true, subtree: false };

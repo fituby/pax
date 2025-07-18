@@ -2,7 +2,7 @@ const appeal_presets = {
     Cheat: ["Engine ", "Cheat ", ": cheat"],
     Boost: ["Booster ", "Arena ban ", "Boost ", ": boost"],
     Shadowban: ["Shadowban "],
-    Alt: [" alt", "IP ban", "infractions"],
+    Alt: [" alt", "IP ban", "admission"],
     Playban_Ragesit: ["Playban ", "ragesit"],
     Blog: ["Blogs "]
 };
@@ -52,6 +52,7 @@ function create_group(group, options) {
     });
 }
 
+var custom_preset_options = {};
 if ($('textarea#form3-text').length && !$('.appeal-preset-alt').length) {
     // Default presets
     const presets = $('.appeal-presets').attr("id", "appeal-presets");
@@ -69,30 +70,7 @@ if ($('textarea#form3-text').length && !$('.appeal-preset-alt').length) {
         $(`.appeal-presets-${group} option`).first().text(group);
     });
 
-    // Custom presets
-    $.when(getData('appeal_presets')).then(function(saved_data) {
-        const custom_presets = saved_data['appeal_presets'];
-        if (!custom_presets)
-            return;
-        $.each(custom_presets, function (group, data) {
-            if ($.isEmptyObject(data))
-                return;
-            let options = [];
-            if (group in appeal_presets) {
-                $.each(data, function (name, text) {
-                    options.push(`<option title="${text}" value="${text}">${name}</option>`);
-                });
-                $(`.appeal-presets-${group}`).append(options.join(""));
-                return;
-            }
-            $.each(data, function (name, text) {
-                options.push(`<option title="${text}">${name}</option>`);
-            });
-            create_group(group, options);
-        });
-    });
-
-    // New presets form
+    // Custom presets form
     $('.submit').css('margin-top', "10px");
     $(`<fieldset id="custom-presets" class="toggle-box toggle-box--toggle toggle-box--ready toggle-box--toggle-off">
         <legend tabindex="0">Custom presets</legend>
@@ -102,15 +80,17 @@ if ($('textarea#form3-text').length && !$('.appeal-preset-alt').length) {
                     <textarea id="pax-new-preset-text" rows="5" cols="50" style="width: 100%;" placeholder="Text of a new preset..."></textarea>
                 </td>
                 <td>
-                    <input id="pax-new-preset-group" type="text" maxlength="20" style="width: 100%;" value="Custom" placeholder="Group..."></input>
+                    <input id="pax-new-preset-group" list="pax-preset-group-list" type="text" maxlength="20" style="width: 100%;" value="Custom" placeholder="Group name..."></input>
+                    <datalist id="pax-preset-group-list"></datalist>
                 </td>
             </tr>
             <tr><td>
-                <input id="pax-new-preset-name" type="text" maxlength="50" placeholder="Preset name..." style="width:100%;"></input>
+                <input id="pax-new-preset-name" list="pax-preset-name-list" type="text" maxlength="50" placeholder="Preset name..." style="width:100%;"></input>
+                <datalist id="pax-preset-name-list"></datalist>
             </td></tr>
             <tr><td>
-                <button id="pax-save-preset" class="button button-thin" style="width:49%; margin-bottom: 10px;">Save</button>
-                <button id="pax-delete-preset" class="button button-thin" style="width:49%; margin-bottom: 10px;">Delete</button>
+                <button id="pax-save-preset" class="button button-thin" title="Save a custom preset" style="width:49%; margin-bottom: 10px;">Save</button>
+                <button id="pax-delete-preset" class="button button-thin" title="Delete a custom preset defined by its group and name specified above" style="width:49%; margin-bottom: 10px;">Delete</button>
             </td></tr>
         </tbody></table>
     </fieldset>`).insertAfter('#appeal-actions');
@@ -121,14 +101,46 @@ if ($('textarea#form3-text').length && !$('.appeal-preset-alt').length) {
             $('#custom-presets').addClass('toggle-box--toggle-off');
     });
     $('#pax-new-preset-group').on('input', function() {
-        $(this).val($(this).val().replace(/[^\w-]/g, ''));
+        const group = $(this).val().replace(/[^\w-]/g, '');
+        $(this).val(group);
+        $('#pax-preset-name-list').empty();
+        if (group in custom_preset_options)
+            $('#pax-preset-name-list').append(custom_preset_options[group].join(""));
+    });
+
+    // Custom presets
+    $.when(getData('appeal_presets')).then(function(saved_data) {
+        const custom_presets = saved_data['appeal_presets'];
+        if (!custom_presets)
+            return;
+        $.each(custom_presets, function (group, data) {
+            if ($.isEmptyObject(data))
+                return;
+            custom_preset_options[group] = [];
+            let options = [];
+            if (group in appeal_presets) {
+                $.each(data, function (name, text) {
+                    custom_preset_options[group].push(`<option value="${name}">`);
+                    options.push(`<option title="${text}" value="${text}">${name}</option>`);
+                });
+                $(`.appeal-presets-${group}`).append(options.join(""));
+                return;
+            }
+            $.each(data, function (name, text) {
+                custom_preset_options[group].push(`<option value="${name}">`);
+                options.push(`<option title="${text}">${name}</option>`);
+            });
+            create_group(group, options);
+            $('#pax-preset-group-list').append(`<option value="${group}">`);
+        });
+        $('#pax-new-preset-group').trigger("input");
     });
 
     // Create a new preset
     $('#pax-save-preset').click(() => {
-        let group = escapeHtml($('#pax-new-preset-group').val().trim());
-        let name = escapeHtml($('#pax-new-preset-name').val().trim());
-        let text = escapeHtml($('#pax-new-preset-text').val().trim());
+        const group = escapeHtml($('#pax-new-preset-group').val().trim());
+        const name = escapeHtml($('#pax-new-preset-name').val().trim());
+        const text = escapeHtml($('#pax-new-preset-text').val().trim());
         if (!group || !name || !text) {
             alert("To save a preset, please specify its group, name, and text.")
             return;
@@ -176,8 +188,8 @@ if ($('textarea#form3-text').length && !$('.appeal-preset-alt').length) {
 
     // Delete an existing preset
     $('#pax-delete-preset').click(() => {
-        let group = escapeHtml($('#pax-new-preset-group').val().trim());
-        let name = escapeHtml($('#pax-new-preset-name').val().trim());
+        const group = escapeHtml($('#pax-new-preset-group').val().trim());
+        const name = escapeHtml($('#pax-new-preset-name').val().trim());
         if (!group || !name) {
             alert("To delete a preset, please first specify its group and name.")
             return;
