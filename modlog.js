@@ -1,5 +1,8 @@
 var modlog_items = {};
 
+const boost_types = ["Sandbagging", "Throwing", "Failure", "Boosting"];
+const comm_types = ["Offensive", "Accusations", "Inappropriate", "Spam", "Team", "Advertisements", "Chat/Forum"];
+
 function count_msgs(data, type, name, sup) {
     if (!data[type])
         return "";
@@ -18,14 +21,56 @@ function count_msgs(data, type, name, sup) {
     }
     const txt_start = type == 'warning' ? 9 : 0;
     let msg_list = [];
-    if (sup)
+    if (sup) {
         $.each(msgs, function (key, val) {
             msg_list.push(`${val} ${key.slice(txt_start)}<br>`);
         });
-    else
+    }
+    else {
+        let report_type = $('#inquiry .report h3 strong').first().text() || "";
+        if (report_type && report_type != "Boost" && report_type != "Comm" && report_type != "Cheat") {
+            if (["Print", "Other", "Username"].includes(report_type)) {
+                report_type = "";
+            }
+            else {
+                const a1 = $('#inquiry .report h3 a:not(.user-link)').first().attr('href');
+                if (a1 && a1.endsWith("/communication"))
+                    report_type = "Comm";
+            }
+        }
         $.each(msgs, function (key, val) {
-            msg_list.push(`<span style="display: flex; align-items: baseline;"><h2 style="padding-right: 5px;">${val}</h2>${key.slice(txt_start)}</span>`);
+            const txt = key.slice(txt_start);
+            let highlight_style = "";
+            if (report_type && txt && ['warning', 'action'].includes(type)) {
+                console.log(`report_type=${report_type} txt=${txt} type=${type}`);
+                const txt_type = txt.split(" ")[0];
+                if (report_type == "Boost") {
+                    if (type == 'warning') {
+                        if (boost_types.includes(txt_type))
+                            highlight_style = "background: var(--m-bad_bg--mix-50);";
+                        else if (txt_type == "possible")
+                            highlight_style = "background: var(--m-bad_bg--mix-20);";
+                    }
+                }
+                else if (report_type == "Cheat") {
+                    if (type == 'action' && txt_type == "game")
+                        highlight_style = "background: var(--m-bad_bg--mix-50);";
+                }
+                else if (report_type == "Comm") {
+                    if (type == 'warning' && comm_types.includes(txt_type))
+                        highlight_style = "background: var(--m-bad_bg--mix-50);";
+                    else if (type == 'action' && ["chat", "delete", "kid"].includes(txt_type))
+                        highlight_style = "background: var(--m-primary_bg--mix-20);";
+                    else if (type == 'action' && txt_type == "shadowban")
+                        highlight_style = "background: var(--m-bad_bg--mix-50);";
+                }
+            }
+            msg_list.push(`<span style="display: flex; align-items: baseline; ${highlight_style}">
+                             <h2 style="padding-right: 5px;">${val}</h2>
+                             ${txt}
+                           </span>`);
         });
+    }
     if (!msg_list.length)
         return "";
     return `<span style="padding: 0 20px 0 0">
@@ -74,6 +119,8 @@ function get_age(obj) {
 }
 
 function add_modlog_info() {
+    if ($('#pax-modlog-info').length)
+        return;
     for (const timeline_action of timeline_actions)
         $(`.mod-timeline__event--modlog .${timeline_action}`).each(function(i, o) {
             const age = get_age($(this));
