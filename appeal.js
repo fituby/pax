@@ -52,6 +52,24 @@ function create_group(group, options) {
     });
 }
 
+function base64ToTxt(base64) {
+    const binString = atob(base64);
+    const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0));
+    return new TextDecoder().decode(bytes);
+}
+
+function txtToBase64(txt) {
+    const bytes = new TextEncoder().encode(txt);
+    const binString = Array.from(bytes, (byte) =>
+        String.fromCodePoint(byte),
+    ).join("");
+    return btoa(binString);
+}
+
+function update_export(custom_presets) {
+    $('#pax-export-presets').attr('href', `data:application/json;base64,${txtToBase64(JSON.stringify(custom_presets))}`);
+}
+
 var custom_preset_options = {};
 if ($('textarea#form3-text').length && !$('.appeal-preset-alt').length) {
     // Default presets
@@ -92,6 +110,10 @@ if ($('textarea#form3-text').length && !$('.appeal-preset-alt').length) {
                 <button id="pax-save-preset" class="button button-thin" title="Save a custom preset" style="width:49%; margin-bottom: 10px;">Save</button>
                 <button id="pax-delete-preset" class="button button-thin" title="Delete a custom preset defined by its group and name specified above" style="width:49%; margin-bottom: 10px;">Delete</button>
             </td></tr>
+            <tr><td colspan="2">
+                <a id="pax-export-presets" href='data:application/json;charset=utf-8,{}' download="custom_presets.json" class="button button-thin" title="Save all custom preset to a file" style="margin-bottom: 10px; margin-right: 10px;">Export all...</a>
+                Import: <input id="pax-import-presets" type="file" id="file-selector" accept=".json" style="margin-bottom: 10px;"/>
+            </td></tr>
         </tbody></table>
     </fieldset>`).insertAfter('#appeal-actions');
     $('#custom-presets legend').click(() => {
@@ -106,6 +128,56 @@ if ($('textarea#form3-text').length && !$('.appeal-preset-alt').length) {
         $('#pax-preset-name-list').empty();
         if (group in custom_preset_options)
             $('#pax-preset-name-list').append(custom_preset_options[group].join(""));
+    });
+    $('#pax-import-presets:file').change(function() {
+        const file = $(this).val();
+        if (!file)
+            return;
+        const files = $(this).get(0).files;
+        if (!files.length) {
+            alert("Failed to read the file.")
+            return;
+        }
+        $.when(getData('appeal_presets')).then(function(saved_data) {
+            const custom_presets = saved_data['appeal_presets'];
+            const file_presets = files[0];
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                const decoded = base64ToTxt(e.target.result.split(',')[1]);
+                const loaded_presets = JSON.parse(decoded);
+                if ($.isEmptyObject(loaded_presets)) {
+                    alert("Failed to decode the file.")
+                    return;
+                }
+                if (!jQuery.isEmptyObject(custom_presets)) {
+                    let num_curr_groups = 0;
+                    let num_curr_names = 0;
+                    $.each(custom_presets, function (group, data) {
+                        num_curr_groups++;
+                        $.each(data, function (name, text) {
+                            num_curr_names++;
+                        });
+                    });
+                    if (num_curr_names) {
+                        let num_new_groups = 0;
+                        let num_new_names = 0;
+                        $.each(loaded_presets, function (group, data) {
+                            num_new_groups++;
+                            $.each(data, function (name, text) {
+                                num_new_names++;
+                            });
+                        });
+                        const ok = confirm(`The current custom presets will be deleted and replaced with those loaded from the file.\n\nExisting groups: ${num_curr_groups}\nExisting presets: ${num_curr_names}\nNew groups: ${num_new_groups}\nNew presets: ${num_new_names}\n\nContinue?`);
+                        if (!ok)
+                            return;
+                    }
+                }
+                browser.storage.local.set({"appeal_presets": loaded_presets}).then(function() {
+                    location.reload();
+                });
+            };
+            reader.readAsDataURL(file_presets);
+        });
     });
 
     // Custom presets
@@ -134,6 +206,7 @@ if ($('textarea#form3-text').length && !$('.appeal-preset-alt').length) {
             $('#pax-preset-group-list').append(`<option value="${group}">`);
         });
         $('#pax-new-preset-group').trigger("input");
+        update_export(custom_presets);
     });
 
     // Create a new preset
@@ -183,6 +256,7 @@ if ($('textarea#form3-text').length && !$('.appeal-preset-alt').length) {
             }
             $('#pax-new-preset-name').val("");
             $('#pax-new-preset-text').val("");
+            update_export(new_presets);
         });
     });
 
@@ -226,6 +300,7 @@ if ($('textarea#form3-text').length && !$('.appeal-preset-alt').length) {
             if (!(group in def_presets) && $(`.appeal-presets-${group} option`).length == 1)
                 $(`.appeal-presets-${group}`).remove();
             $('#pax-new-preset-name').val("");
+            update_export(curr_presets);
         });
     });
 }
