@@ -316,7 +316,6 @@ const mod_zone_callback = (mutationList, observer) => {
             for (const node of mutation.addedNodes) {
                 if (node.id == "mz_timeline") {
                     setTimeout(() => { init_modlog(); });
-                    setTimeout(() => { init_modlog(); }, 2000);
                     return;
                 }
             }
@@ -325,8 +324,11 @@ const mod_zone_callback = (mutationList, observer) => {
 };
 const observer_modlog = new MutationObserver(mod_zone_callback);
 $('.mod-zone').each(function(i, o) {
-    if ($(this).is('.none'))
+    if ($(this).is('.none')) {
         observer_modlog.observe(o, config_modlog);
-    else
-        setTimeout(() => { init_modlog(); });
+    }
+    else{
+        setTimeout(() => { init_modlog(); }, 500);
+        setTimeout(() => { init_modlog(); }, 2000);
+    }
 });

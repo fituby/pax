@@ -51,7 +51,9 @@
 			             "*://lichess.org/swiss/*",
 			             "*://lichess.dev/swiss/*",
 			             "*://lichess.org/broadcast/*",
-			             "*://lichess.dev/broadcast/*"],
+			             "*://lichess.dev/broadcast/*",
+			             "*://lichess.org/team/*",
+			             "*://lichess.dev/team/*"],
 			"js": [ "jquery.min.js", "chat.js" ],
 			"run_at": "document_end"
 		}
