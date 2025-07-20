@@ -1,0 +1,12 @@
+.pax-active {
+  background: var(--m-accent--fade-80);
+  border: 0;
+  margin: 1px;
+  text-shadow: unset !important;
+}
+.pax-inactive {
+  background: var(--m-secondary--fade-60);
+  border: 0;
+  margin: 1px;
+  text-shadow: unset !important;
+}

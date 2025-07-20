@@ -60,7 +60,7 @@ function count_msgs(data, type, name, sup) {
                     if (type == 'warning' && comm_types.includes(txt_type))
                         highlight_style = "background: var(--m-bad_bg--mix-50);";
                     else if (type == 'action' && ["chat", "delete", "kid"].includes(txt_type))
-                        highlight_style = "background: var(--m-primary_bg--mix-20);";
+                        highlight_style = "background: var(--m-primary_bg--mix-50);";
                     else if (type == 'action' && txt_type == "shadowban")
                         highlight_style = "background: var(--m-bad_bg--mix-50);";
                 }
@@ -220,14 +220,14 @@ function modlog_btn_clicked(btn_id) {
         return;
 
     const d = modlog_btns[btn.attr('id')];
-    if (btn.is('.active'))
-        btn.removeClass('active').css("background", "var(--c-secondary)");
+    if (btn.is('.pax-active'))
+        btn.removeClass('pax-active').addClass('pax-inactive');
     else
-        btn.addClass('active').css("background", "var(--c-accent)");
+        btn.removeClass('pax-inactive').addClass('pax-active');
 
     $(d.sel).each(function(i, o) {
         const element = $(this).is('.mod-timeline__event') ? $(this) : $(this).closest('.mod-timeline__event');
-        if (btn.is('.active'))
+        if (btn.is('.pax-active'))
             element.addClass('none');
         else
             element.removeClass('none');
@@ -246,16 +246,16 @@ function modlog_total_clicked() {
         const btn = $(`#${btn_id}`);
         if (!btn.length)
             return;
-        if (btn.is('.active'))
+        if (btn.is('.pax-active'))
             num_active++;
         else
             num_inactive++;
     });
     $.each(modlog_btns, function (btn_id, d) {
         const btn = $(`#${btn_id}`);
-        if (num_active >= num_inactive && btn.is('.active'))
+        if (num_active >= num_inactive && btn.is('.pax-active'))
             btn.trigger("click");
-        else if (num_active < num_inactive && !btn.is('.active'))
+        else if (num_active < num_inactive && !btn.is('.pax-active'))
             btn.trigger("click");
     });
 }
@@ -268,10 +268,7 @@ function add_modlog_buttons() {
     $.each(modlog_btns, function (btn_id, d) {
         const num = $(d.sel).length;
         if (num) {
-            btns.push(`<button id="${btn_id}" class="btn-rack__btn"
-                style="background: var(--c-secondary); color: #fff; border-bottom-width: 0; border-top-width: 0; text-shadow: 0 1px 1px #000 !important;">
-                ${d.name}: ${num}
-            </button>`);
+            btns.push(`<button id="${btn_id}" class="btn-rack__btn pax-inactive">${d.name}: ${num}</button>`);
             btn_ids.push(btn_id);
         }
     });
@@ -303,6 +300,14 @@ function split_presets() {
     //$('.pm-preset:not(.pm-preset-msg) option:contains("Send PM")').text("Warn");
 }
 
+function init_modlog() {
+    if (!$('#pax-modlog-info').length) {
+        add_modlog_info();
+        add_modlog_buttons();
+        split_presets();
+    }
+}
+
 const config_modlog = { attributes: false, childList: true, subtree: false };
 const mod_zone_callback = (mutationList, observer) => {
     modlog_items = {};
@@ -310,13 +315,8 @@ const mod_zone_callback = (mutationList, observer) => {
         if (mutation.type === "childList") {
             for (const node of mutation.addedNodes) {
                 if (node.id == "mz_timeline") {
-                    setTimeout(() => {
-                        if (!$('#pax-modlog-info').length) {
-                            add_modlog_info();
-                            add_modlog_buttons();
-                            split_presets();
-                        }
-                    });
+                    setTimeout(() => { init_modlog(); });
+                    setTimeout(() => { init_modlog(); }, 2000);
                     return;
                 }
             }
@@ -325,16 +325,8 @@ const mod_zone_callback = (mutationList, observer) => {
 };
 const observer_modlog = new MutationObserver(mod_zone_callback);
 $('.mod-zone').each(function(i, o) {
-    if ($(this).is('.none')) {
+    if ($(this).is('.none'))
         observer_modlog.observe(o, config_modlog);
-    }
-    else {
-        if (!$('#pax-modlog-info').length) {
-            setTimeout(() => {
-                add_modlog_info();
-                add_modlog_buttons();
-                split_presets();
-            });
-        }
-    }
+    else
+        setTimeout(() => { init_modlog(); });
 });

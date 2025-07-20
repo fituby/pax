@@ -7,26 +7,25 @@ const num_chat_msgs = $('.chat .line').length;
 const num_chat_msgs_author = $('.chat .line.author').length;
 const num_priv_msgs = $('.post').length;
 const num_priv_msgs_author = $('.post.author').length;
-const buttons_style = 'style="background: var(--c-secondary); color: #fff; border-bottom-width: 0; border-top-width: 0; text-shadow: 0 1px 1px #000 !important;"';
 let btns_chat = [];
 if (num_chat_msgs - num_chat_msgs_author) {
     const text_msgs = `Others' msgs: ${num_chat_msgs - num_chat_msgs_author} of ${num_chat_msgs}`;
-    btns_chat.push(`<button id="pax-only-author-msgs" class="btn-rack__btn" ${buttons_style}>${text_msgs}</button>`);
+    btns_chat.push(`<button id="pax-only-author-msgs" class="btn-rack__btn pax-inactive">${text_msgs}</button>`);
 }
-btns_chat.push(`<button id="pax-scrollbars-chat" class="btn-rack__btn" ${buttons_style}>Scrollbars</button>`);
+btns_chat.push(`<button id="pax-scrollbars-chat" class="btn-rack__btn pax-inactive">Scrollbars</button>`);
 let btns_priv = [];
 if (num_priv_msgs - num_priv_msgs_author) {
     const text_msgs = `Others' msgs: ${num_priv_msgs - num_priv_msgs_author} of ${num_priv_msgs}`;
-    btns_priv.push(`<button id="pax-only-author-posts" class="btn-rack__btn" ${buttons_style}>${text_msgs}</button>`);
+    btns_priv.push(`<button id="pax-only-author-posts" class="btn-rack__btn pax-inactive">${text_msgs}</button>`);
 }
 if (num_team_msgs_author + num_team_msgs_others) {
     const text_msgs = `Team msgs: ${num_team_msgs_author}+${num_team_msgs_others}`;
-    btns_priv.push(`<button id="pax-team-msgs" class="btn-rack__btn" ${buttons_style}>${text_msgs}</button>`);
+    btns_priv.push(`<button id="pax-team-msgs" class="btn-rack__btn pax-inactive">${text_msgs}</button>`);
 }
-btns_priv.push(`<button id="pax-scrollbars-priv" class="btn-rack__btn" ${buttons_style}>Scrollbars</button>`);
+btns_priv.push(`<button id="pax-scrollbars-priv" class="btn-rack__btn pax-inactive">Scrollbars</button>`);
 
 const comms_buttons = `<div>
-	<div class="btn-rack">
+	<div class="btn-rack" style="margin-right: 10px;">
 	    <span>Chats:</span>
 	    ${btns_chat.join("")}
 	</div>
@@ -37,60 +36,60 @@ const comms_buttons = `<div>
 </div>`;
 
 function scrollbars_priv() {
-	if ($('#pax-scrollbars-priv').is('.active')) {
-		$('#pax-scrollbars-priv').removeClass('active').css("background", "var(--c-secondary)");
+	if ($('#pax-scrollbars-priv').is('.pax-active')) {
+		$('#pax-scrollbars-priv').removeClass('pax-active').addClass('pax-inactive');
 		$(".thread").css("max-height", "300px");
 	}
 	else {
-		$('#pax-scrollbars-priv').addClass('active').css("background", "var(--c-accent)");
+		$('#pax-scrollbars-priv').removeClass('pax-inactive').addClass('pax-active');
 		$(".thread").css("max-height", "none");
 	}
 }
 
 function scrollbars_chat() {
-	if ($('#pax-scrollbars-chat').is('.active')) {
-		$('#pax-scrollbars-chat').removeClass('active').css("background", "var(--c-secondary)");
+	if ($('#pax-scrollbars-chat').is('.pax-active')) {
+		$('#pax-scrollbars-chat').removeClass('pax-active').addClass('pax-inactive');
 		$(".chat").css("height", "15em");
 	}
 	else {
-		$('#pax-scrollbars-chat').addClass('active').css("background", "var(--c-accent)");
+		$('#pax-scrollbars-chat').removeClass('pax-inactive').addClass('pax-active');
 		$(".chat").css("height", "auto");
 	}
 }
 
 function hide_team_msgs() {
-	if ($('#pax-team-msgs').is('.active')) {
-		$('#pax-team-msgs').removeClass('active').css("background", "var(--c-secondary)");
+	if ($('#pax-team-msgs').is('.pax-active')) {
+		$('#pax-team-msgs').removeClass('pax-active').addClass('pax-inactive');
 		$(`.post:contains(${team_msg})`).removeClass('none');
-		if ($('#pax-only-author-posts').is('.active'))
+		if ($('#pax-only-author-posts').is('.pax-active'))
 			$('.post:not(.author)').addClass('none');
 	}
 	else {
-		$('#pax-team-msgs').addClass('active').css("background", "var(--c-accent)");
+		$('#pax-team-msgs').removeClass('pax-inactive').addClass('pax-active');
 		$(`.post:contains(${team_msg})`).addClass('none');
 	}
 }
 
 function show_only_author_posts() {
-	if ($('#pax-only-author-posts').is('.active')) {
-		$('#pax-only-author-posts').removeClass('active').css("background", "var(--c-secondary)");
+	if ($('#pax-only-author-posts').is('.pax-active')) {
+		$('#pax-only-author-posts').removeClass('pax-active').addClass('pax-inactive');
 		$('.post:not(.author)').removeClass('none');
-		if ($('#pax-team-msgs').is('.active'))
+		if ($('#pax-team-msgs').is('.pax-active'))
 			$(`.post:contains(${team_msg})`).addClass('none');
 	}
 	else {
-		$('#pax-only-author-posts').addClass('active').css("background", "var(--c-accent)");
+		$('#pax-only-author-posts').removeClass('pax-inactive').addClass('pax-active');
 		$('.post:not(.author)').addClass('none');
 	}
 }
 
 function show_only_author_msgs() {
-	if ($('#pax-only-author-msgs').is('.active')) {
-		$('#pax-only-author-msgs').removeClass('active').css("background", "var(--c-secondary)");
+	if ($('#pax-only-author-msgs').is('.pax-active')) {
+		$('#pax-only-author-msgs').removeClass('pax-active').addClass('pax-inactive');
 		$('.chat .line:not(.author)').removeClass('none');
 	}
 	else {
-		$('#pax-only-author-msgs').addClass('active').css("background", "var(--c-accent)");
+		$('#pax-only-author-msgs').removeClass('pax-inactive').addClass('pax-active');
 		$('.chat .line:not(.author)').addClass('none');
 	}
 }
