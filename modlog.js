@@ -73,8 +73,9 @@ function count_msgs(data, type, name, sup) {
     }
     if (!msg_list.length)
         return "";
+    const header = (sup == "old") ? `<h3>${name} ${sup.toUpperCase()}:</h3>` : `<h2>${name}<sup>${sup}</sup></h2>`;
     return `<span style="padding: 0 20px 0 0">
-                <h2>${name}<sup>${sup}</sup></h2>
+                ${header}
                 ${msg_list.join("")}
             </span>`;
 }
@@ -121,6 +122,7 @@ function get_age(obj) {
 function add_modlog_info() {
     if ($('#pax-modlog-info').length)
         return;
+    modlog_items = {};
     for (const timeline_action of timeline_actions)
         $(`.mod-timeline__event--modlog .${timeline_action}`).each(function(i, o) {
             const age = get_age($(this));
@@ -289,34 +291,135 @@ function add_modlog_buttons() {
             modlog_btn_clicked(btn_id);
 }
 
-function split_presets() {
+function disable_name_close() {
+    $('#pax-name-close').prop('disabled', true);
+}
+
+function disable_kid_msg() {
+    $('#pax-kid-msg').prop('disabled', true);
+}
+
+function add_modlog_actions() {
     if ($('.pm-preset-warn').length)
         return;
+
+    // Send PM + Warn
     $('.pm-preset').clone(true).addClass('pm-preset-warn').insertAfter('.pm-preset');
     $('.pm-preset-warn option').remove();
     $('<option value="">Warn</option>').appendTo('.pm-preset-warn select');
     $('.pm-preset:not(.pm-preset-warn) option:contains("Warning")').appendTo('.pm-preset-warn select');
-    //$('option:not(:contains("Warning: "))+option:not(:contains("Send PM"))').remove();
-    //$('.pm-preset:not(.pm-preset-msg) option:contains("Send PM")').text("Warn");
+
+    // Name+Close
+    const close_name = `<button id="pax-name-close" class="btn-rack__btn" style="border: 0; margin: 1px;" title='Alt+Close this account + add note \"name\"'>Name+Close</button>`;
+    const add_action_btns = `<div id="pax-add-actions" class="btn-rack">${close_name}</div>`;
+    $(add_action_btns).insertBefore('.pm-preset:not(.pm-preset-warn)');
+    const btn_alt = $('.btn-rack__btn:not(.active):contains("Alt")');
+    const btn_close = $('.btn-rack__btn:not(#pax-name-close):not(.active):contains("Close")');
+    if (btn_alt.length != 1 || btn_close.length != 1) {
+        disable_name_close();
+    }
+    else {
+        $('#pax-name-close').click(function() {
+            const note_form = $('.note-form');
+            if (note_form.length != 1)
+                return;
+            const note_action = $('.note-form').attr('action');
+            if (!note_action)
+                return;
+            const btn_alt = $('.btn-rack__btn:not(.active):contains("Alt")');
+            const btn_close = $('.btn-rack__btn:not(#pax-name-close):not(.active):contains("Close")');
+            if (btn_alt.length != 1 || btn_close.length != 1)
+                return;
+            const alt_action = btn_alt.parent().attr('action');
+            if (!alt_action)
+                return;
+            $.post(alt_action, function() {
+                disable_name_close();
+                $.post(note_action, data = {text: "name", noteType: "mod"}, function() {
+                    location.reload();
+                });
+            });
+        });
+        btn_alt.on("click keyup", disable_name_close);
+        btn_close.on("click keyup", disable_name_close);
+    }
+
+    // Kid+Msg
+    let num_btn_kid = 0;
+    $('.btn-rack__btn:not(.active):contains("Kid")').each(function(i, o) {
+        if ($(this).text() == "Kid") {
+            $(this).removeClass('yes-no-confirm');
+            num_btn_kid++;
+        }
+    });
+    const kid_msg = `<button id="pax-kid-msg" class="btn-rack__btn" style="border: 0; margin: 1px;" title='Kid mode + Mod message'>Kid+Msg</button>`;
+    $(kid_msg).appendTo('#pax-add-actions');
+    if (num_btn_kid != 1) {
+        disable_kid_msg();
+    }
+    else {
+        $('#pax-kid-msg').click(function() {
+            const note_form = $('.note-form');
+            if (note_form.length != 1)
+                return;
+            const note_action = $('.note-form').attr('action');
+            if (!note_action)
+                return;
+            const btn_kid = $('.btn-rack__btn:not(.active)').filter(function(i) {
+                return $(this).text() == "Kid";
+            });
+            if (btn_kid.length != 1)
+                return;
+            const kid_action = btn_kid.parent().attr('action');
+            if (!kid_action)
+                return;
+            const msg_kid = $('.pm-preset:not(.pm-preset-warn) option:contains("kid mode")');
+            if (msg_kid.length != 1)
+                return;
+            const val_msg_kid = msg_kid.attr('value');
+            if (!val_msg_kid)
+                return;
+            const msg_action = $('.pm-preset:not(.pm-preset-warn)').attr('action');
+            if (!msg_action)
+                return;
+            const ok = confirm('Kid mode + Mod message?');
+            if (!ok)
+                return;
+            $.post(kid_action, function() {
+                disable_kid_msg();
+                $.post(`${msg_action}${val_msg_kid}`, function() {
+                    location.reload();
+                });
+            });
+        });
+        $('.btn-rack__btn:not(.active)').filter(function(i) {
+            return $(this).text() == "Kid";
+        }).on("click keyup", disable_kid_msg);
+    }
 }
 
 function init_modlog() {
     if (!$('#pax-modlog-info').length) {
         add_modlog_info();
         add_modlog_buttons();
-        split_presets();
+        add_modlog_actions();
     }
 }
 
 const config_modlog = { attributes: false, childList: true, subtree: false };
 const mod_zone_callback = (mutationList, observer) => {
-    modlog_items = {};
+    let is_timeline = false;
+    let is_actions = false;
     for (const mutation of mutationList) {
         if (mutation.type === "childList") {
             for (const node of mutation.addedNodes) {
-                if (node.id == "mz_timeline") {
+                if (!is_timeline && node.id == "mz_timeline") {
+                    is_timeline = true;
                     setTimeout(() => { init_modlog(); });
-                    return;
+                }
+                if (!is_actions && node.id == "mz_actions") {
+                    is_actions = true;
+                    setTimeout(() => { add_modlog_actions(); });
                 }
             }
         }
@@ -324,10 +427,8 @@ const mod_zone_callback = (mutationList, observer) => {
 };
 const observer_modlog = new MutationObserver(mod_zone_callback);
 $('.mod-zone').each(function(i, o) {
-    if ($(this).is('.none')) {
-        observer_modlog.observe(o, config_modlog);
-    }
-    else{
+    observer_modlog.observe(o, config_modlog);
+    if (!$(this).is('.none')) {
         setTimeout(() => { init_modlog(); }, 500);
         setTimeout(() => { init_modlog(); }, 2000);
     }
