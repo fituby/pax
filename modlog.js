@@ -74,7 +74,7 @@ function count_msgs(data, type, name, sup) {
     if (!msg_list.length)
         return "";
     const header = (sup == "old") ? `<h3>${name} ${sup.toUpperCase()}:</h3>` : `<h2>${name}<sup>${sup}</sup></h2>`;
-    return `<span style="padding: 0 20px 0 0">
+    return `<span style="padding: 0 20px 0 0;">
                 ${header}
                 ${msg_list.join("")}
             </span>`;
@@ -221,12 +221,12 @@ function modlog_btn_clicked(btn_id) {
     if (!btn)
         return;
 
-    const d = modlog_btns[btn.attr('id')];
     if (btn.is('.pax-active'))
         btn.removeClass('pax-active').addClass('pax-inactive');
     else
         btn.removeClass('pax-inactive').addClass('pax-active');
 
+    const d = modlog_btns[btn.attr('id')];
     $(d.sel).each(function(i, o) {
         const element = $(this).is('.mod-timeline__event') ? $(this) : $(this).closest('.mod-timeline__event');
         if (btn.is('.pax-active'))

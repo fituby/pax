@@ -70,6 +70,12 @@ function update_export(custom_presets) {
     $('#pax-export-presets').attr('href', `data:application/json;base64,${txtToBase64(JSON.stringify(custom_presets))}`);
 }
 
+$('.appeal__msg--mod').css('background', "var(--m-primary_bg--mix-15)");
+const my_id = $('#user_tag').text().toLowerCase();
+$('.appeal__msg--mod a.user-link').filter(function() {
+    const href = $(this).attr('href');
+    return href && href.toLowerCase().endsWith(`/${my_id}`);
+}).closest('.appeal__msg--mod').css('background', "var(--m-secondary_bg--mix-15)");
 var custom_preset_options = {};
 if ($('textarea#form3-text').length && !$('.appeal-preset-alt').length) {
     // Default presets

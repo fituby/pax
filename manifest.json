@@ -28,7 +28,7 @@
 			             "*://lichess.dev/@/*",
 			             "*://lichess.org/mod/*/communication",
 			             "*://lichess.dev/mod/*/communication"],
-			"js": [ "jquery.min.js", "modlog.js" ],
+			"js": [ "jquery.min.js", "modlog.js", "notes.js" ],
 			"css": ["styles.css"],
 			"run_at": "document_end"
 		},
