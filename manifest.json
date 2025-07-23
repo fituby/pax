@@ -25,10 +25,15 @@
 	"content_scripts": [
 		{
 			"matches": [ "*://lichess.org/@/*",
-			             "*://lichess.dev/@/*",
-			             "*://lichess.org/mod/*/communication",
-			             "*://lichess.dev/mod/*/communication"],
+			             "*://lichess.dev/@/*"],
 			"js": [ "jquery.min.js", "modlog.js", "notes.js" ],
+			"css": ["styles.css"],
+			"run_at": "document_end"
+		},
+		{
+			"matches": [ "*://lichess.org/mod/*/communication",
+			             "*://lichess.dev/mod/*/communication"],
+			"js": [ "jquery.min.js", "modlog.js" ],
 			"css": ["styles.css"],
 			"run_at": "document_end"
 		},
