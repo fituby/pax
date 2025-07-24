@@ -28,7 +28,7 @@ function note_btn_clicked(btn_id) {
         btn.removeClass('pax-inactive').addClass('pax-active');
 
     const d = note_btns[btn.attr('id')];
-    $('.note form').each(function(i, o) {
+    $('.note form').not('#inquiry .note form').each(function(i, o) {
         const attr = $(this).attr('action');
         if (!attr.startsWith(d.start) || !attr.endsWith(d.end))
             return;
@@ -46,7 +46,7 @@ function note_mine_btn_clicked() {
     else
         btn.removeClass('pax-inactive').addClass('pax-active');
     const my_id = $('#user_tag').text().toLowerCase();
-    $('.note .note__meta a.user-link').each(function(i, o) {
+    $('.note .note__meta a.user-link').not('#inquiry .note .note__meta a.user-link').each(function(i, o) {
         const href = $(this).attr('href');
         if (!href)
             return;
@@ -81,13 +81,13 @@ function note_total_clicked() {
 }
 
 function add_note_buttons() {
-    $('.note').css('padding-left', "1em");
+    $('.note').not('#inquiry .note').css('padding-left', "1em");
     let num = {};
     $.each(note_btns, function (btn_id, d) {
         num[btn_id] = 0;
     });
     // Count & highlight
-    $('.note form').each(function(i, o) {
+    $('.note form').not('#inquiry .note form').each(function(i, o) {
         const attr = $(this).attr('action');
         $.each(note_btns, function (btn_id, d) {
             if (btn_id == 'pax-notes-mine')
@@ -100,7 +100,7 @@ function add_note_buttons() {
         });
     });
     const my_id = $('#user_tag').text().toLowerCase();
-    $('.note .note__meta a.user-link').each(function(i, o) {
+    $('.note .note__meta a.user-link').not('#inquiry .note .note__meta a.user-link').each(function(i, o) {
         const href = $(this).attr('href');
         if (!href)
             return;
@@ -122,7 +122,12 @@ function add_note_buttons() {
     if (btns.length) {
         const total = num['pax-notes-mod'] + num['pax-notes-dox'] + num['pax-notes-std'];
         btns.push(`<button id="pax-notes-total" class="btn-rack__btn">Total: ${total}</button>`);
-        const note_buttons = `<div class="btn-rack" style="margin-top: 10px;">${btns.join("")}</div>`;
+        const note_buttons = `<div style="display: flex; margin-top: 10px;">
+            <h2 style="padding-right: 1em; align-self: end;">Notes</h2>
+            <div class="btn-rack" style="border: 0;">
+                ${btns.join("")}
+            </div>
+        </div>`;
         $(note_buttons).insertAfter('.note-form');
         $.each(note_btns, function (btn_id, d) {
             if (num[btn_id] && btn_id != 'pax-notes-mine')

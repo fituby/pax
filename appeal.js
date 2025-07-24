@@ -76,13 +76,15 @@ async function fetch_user(url) {
     const note_zone = $(data).find('.note-zone');
     if (note_zone.length == 1 && note_zone.find('.note').length) {
         note_zone.addClass('pax-note-zone').insertAfter('#mz_others');
-        $('.note').addClass('pax-note');
+        $('.note').not('#inquiry .note').addClass('pax-note');
         add_note_buttons();
-        //$.each(note_btns, function (btn_id, d) {
-        //    const btn = $(`#${btn_id}`);
-        //    if (!btn.is('.pax-active'))
-        //        btn.trigger("click");
-        //});
+        if ($('#inquiry').length) {
+            $.each(note_btns, function (btn_id, d) {
+                const btn = $(`#${btn_id}`);
+                if (!btn.is('.pax-active'))
+                    btn.trigger("click");
+            });
+        }
         $('.note-zone form').hide();
         $('<h2>Appeal messages</h2>').insertAfter('.note-zone');
     }

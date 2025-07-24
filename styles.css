@@ -13,7 +13,6 @@
 
 .pax-note-zone {
     border-top: 1px solid var(--c-border);
-    border-bottom: 1px solid var(--c-border);
     display: block;
     padding-bottom: 1em;
     margin-bottom: 2em;
@@ -21,9 +20,9 @@
 
 .pax-note {
     padding-right: 1em;
-    padding-top: 1em;
+    padding-top: 10px;
     border-top: 1px solid var(--c-border);
-    margin-top: 1em;
+    margin-top: 10px;
     display: flex;
     flex-flow: row nowrap;
     align-items: center;
