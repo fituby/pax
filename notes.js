@@ -81,6 +81,7 @@ function note_total_clicked() {
 }
 
 function add_note_buttons() {
+    $('.note').css('padding-left', "1em");
     let num = {};
     $.each(note_btns, function (btn_id, d) {
         num[btn_id] = 0;

@@ -70,12 +70,37 @@ function update_export(custom_presets) {
     $('#pax-export-presets').attr('href', `data:application/json;base64,${txtToBase64(JSON.stringify(custom_presets))}`);
 }
 
+async function fetch_user(url) {
+    const response = await fetch(url);
+    const data = await response.text();
+    const note_zone = $(data).find('.note-zone');
+    if (note_zone.length == 1 && note_zone.find('.note').length) {
+        note_zone.addClass('pax-note-zone').insertAfter('#mz_others');
+        $('.note').addClass('pax-note');
+        add_note_buttons();
+        //$.each(note_btns, function (btn_id, d) {
+        //    const btn = $(`#${btn_id}`);
+        //    if (!btn.is('.pax-active'))
+        //        btn.trigger("click");
+        //});
+        $('.note-zone form').hide();
+        $('<h2>Appeal messages</h2>').insertAfter('.note-zone');
+    }
+}
+
+// Add styles
 $('.appeal__msg--mod').css('background', "var(--m-primary_bg--mix-15)");
 const my_id = $('#user_tag').text().toLowerCase();
 $('.appeal__msg--mod a.user-link').filter(function() {
     const href = $(this).attr('href');
     return href && href.toLowerCase().endsWith(`/${my_id}`);
 }).closest('.appeal__msg--mod').css('background', "var(--m-secondary_bg--mix-15)");
+
+// Add notes
+if (location.pathname.includes('/appeal/'))
+    fetch_user(location.pathname.replace('/appeal/', "/@/"));
+
+// Presets
 var custom_preset_options = {};
 if ($('textarea#form3-text').length && !$('.appeal-preset-alt').length) {
     // Default presets

@@ -1,12 +1,33 @@
 .pax-active {
-  background: var(--m-accent--fade-80) !important;
-  border: 0;
-  margin: 1px;
-  text-shadow: unset !important;
+    background: var(--m-accent--fade-80) !important;
+    border: 0;
+    margin: 1px;
+    text-shadow: unset !important;
 }
 .pax-inactive {
-  background: var(--m-secondary--fade-60) !important;
-  border: 0;
-  margin: 1px;
-  text-shadow: unset !important;
+    background: var(--m-secondary--fade-60) !important;
+    border: 0;
+    margin: 1px;
+    text-shadow: unset !important;
+}
+
+.pax-note-zone {
+    border-top: 1px solid var(--c-border);
+    border-bottom: 1px solid var(--c-border);
+    display: block;
+    padding-bottom: 1em;
+    margin-bottom: 2em;
+}
+
+.pax-note {
+    padding-right: 1em;
+    padding-top: 1em;
+    border-top: 1px solid var(--c-border);
+    margin-top: 1em;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: space-between;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }

@@ -28,41 +28,45 @@ function count_msgs(data, type, name, sup) {
     }
     else {
         let report_type = $('#inquiry .report h3 strong').first().text() || "";
-        if (report_type && report_type != "Boost" && report_type != "Comm" && report_type != "Cheat") {
-            if (["Print", "Other", "Username"].includes(report_type)) {
-                report_type = "";
+        if (report_type) {
+            if (report_type != "Boost" && report_type != "Comm" && report_type != "Cheat") {
+                if (["Print", "Other", "Username"].includes(report_type)) {
+                    report_type = "";
+                }
+                else {
+                    const a1 = $('#inquiry .report h3 a:not(.user-link)').first().attr('href');
+                    if (a1 && a1.endsWith("/communication"))
+                        report_type = "Comm";
+                }
             }
-            else {
-                const a1 = $('#inquiry .report h3 a:not(.user-link)').first().attr('href');
-                if (a1 && a1.endsWith("/communication"))
-                    report_type = "Comm";
-            }
+        }
+        else if ($(location).attr('href').includes("/communication")) {
+            report_type = "Comm";
         }
         $.each(msgs, function (key, val) {
             const txt = key.slice(txt_start);
             let highlight_style = "";
             if (report_type && txt && ['warning', 'action'].includes(type)) {
-                console.log(`report_type=${report_type} txt=${txt} type=${type}`);
                 const txt_type = txt.split(" ")[0];
                 if (report_type == "Boost") {
                     if (type == 'warning') {
                         if (boost_types.includes(txt_type))
-                            highlight_style = "background: var(--m-bad_bg--mix-50);";
+                            highlight_style = "background: var(--m-bad_bg--mix-30);";
                         else if (txt_type == "possible")
-                            highlight_style = "background: var(--m-bad_bg--mix-20);";
+                            highlight_style = "background: var(--m-bad_bg--mix-15);";
                     }
                 }
                 else if (report_type == "Cheat") {
                     if (type == 'action' && txt_type == "game")
-                        highlight_style = "background: var(--m-bad_bg--mix-50);";
+                        highlight_style = "background: var(--m-bad_bg--mix-30);";
                 }
                 else if (report_type == "Comm") {
                     if (type == 'warning' && comm_types.includes(txt_type))
-                        highlight_style = "background: var(--m-bad_bg--mix-50);";
+                        highlight_style = "background: var(--m-bad_bg--mix-30);";
                     else if (type == 'action' && ["chat", "delete", "kid"].includes(txt_type))
-                        highlight_style = "background: var(--m-primary_bg--mix-50);";
+                        highlight_style = "background: var(--m-primary_bg--mix-30);";
                     else if (type == 'action' && txt_type == "shadowban")
-                        highlight_style = "background: var(--m-bad_bg--mix-50);";
+                        highlight_style = "background: var(--m-bad_bg--mix-30);";
                 }
             }
             msg_list.push(`<span style="display: flex; align-items: baseline; ${highlight_style}">
@@ -91,29 +95,16 @@ function add_timeline_info(age, data) {
     return items.join("");
 }
 
-const periods = ['Year', ''];
 const timeline_actions = [
     'mod-timeline__event__action--sentence',
     //'mod-timeline__event__action--undo',
     //'mod-timeline__event__action--account-sentence:not(.mod-timeline__event__action--sentence)'
 ];
 
+const recent_event = '.mod-timeline__event--recent';
+
 function get_age(obj) {
-    const siblings = obj.closest('.mod-timeline__period').children('h3');
-    let age = "?age";
-    if (siblings.length) {
-        const period = siblings.text();
-        let is_old = period.includes('year');
-        if (!is_old) {
-            for (let i = 6; i <= 12; i++) {
-                if (period.includes(`${i} months`)) {
-                    is_old = true;
-                    break;
-                }
-            }
-        }
-        age = is_old ? "old" : "new";
-    }
+    age = obj.is(recent_event) || obj.closest('.mod-timeline__event').is(recent_event) ? "new" : "old";
     if (!(age in modlog_items))
         modlog_items[age] = {};
     return age;
@@ -310,10 +301,10 @@ function add_modlog_actions() {
     $('.pm-preset:not(.pm-preset-warn) option:contains("Warning")').appendTo('.pm-preset-warn select');
 
     // Name+Close
-    const close_name = `<button id="pax-name-close" class="btn-rack__btn" style="border: 0; margin: 1px;" title='Alt+Close this account + add note \"name\"'>Name+Close</button>`;
+    const close_name = `<button id="pax-name-close" class="btn-rack__btn" style="border: 0; margin: 1px;" title='Alt+Close this account + add note \"name\"'>Name+Alt</button>`;
     const add_action_btns = `<div id="pax-add-actions" class="btn-rack">${close_name}</div>`;
     $(add_action_btns).insertBefore('.pm-preset:not(.pm-preset-warn)');
-    const btn_alt = $('.btn-rack__btn:not(.active):contains("Alt")');
+    const btn_alt = $('.btn-rack__btn:not(#pax-name-close):not(.active):contains("Alt")');
     const btn_close = $('.btn-rack__btn:not(#pax-name-close):not(.active):contains("Close")');
     if (btn_alt.length != 1 || btn_close.length != 1) {
         disable_name_close();
@@ -326,7 +317,7 @@ function add_modlog_actions() {
             const note_action = $('.note-form').attr('action');
             if (!note_action)
                 return;
-            const btn_alt = $('.btn-rack__btn:not(.active):contains("Alt")');
+            const btn_alt = $('.btn-rack__btn:not(#pax-name-close):not(.active):contains("Alt")');
             const btn_close = $('.btn-rack__btn:not(#pax-name-close):not(.active):contains("Close")');
             if (btn_alt.length != 1 || btn_close.length != 1)
                 return;
