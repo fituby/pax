@@ -26,28 +26,34 @@
 		{
 			"matches": [ "*://lichess.org/@/*",
 			             "*://lichess.dev/@/*"],
-			"js": [ "jquery.min.js", "modlog.js", "notes.js" ],
+			"js": [ "jquery.min.js", "modlog.js", "notes.js", "inquiry.js" ],
 			"css": ["styles.css"],
+			"run_at": "document_end"
+		},
+		{
+			"matches": [ "*://lichess.org/mod/*/games",
+			             "*://lichess.dev/mod/*/games"],
+			"js": [ "jquery.min.js", "inquiry.js" ],
 			"run_at": "document_end"
 		},
 		{
 			"matches": [ "*://lichess.org/mod/*/communication",
 			             "*://lichess.dev/mod/*/communication"],
-			"js": [ "jquery.min.js", "modlog.js" ],
+			"js": [ "jquery.min.js", "modlog.js", "inquiry.js" ],
 			"css": ["styles.css"],
 			"run_at": "document_end"
 		},
 		{
 			"matches": [ "*://lichess.org/mod/*/communication/private",
 			             "*://lichess.dev/mod/*/communication/private"],
-			"js": [ "jquery.min.js", "modlog.js", "comms.js", "highlights.js" ],
+			"js": [ "jquery.min.js", "modlog.js", "comms.js", "highlights.js", "inquiry.js" ],
 			"css": ["styles.css"],
 			"run_at": "document_end"
 		},
 		{
 			"matches": [ "*://lichess.org/appeal/*",
 			             "*://lichess.dev/appeal/*"],
-			"js": [ "jquery.min.js", "notes.js", "appeal.js", "highlights.js" ],
+			"js": [ "jquery.min.js", "notes.js", "appeal.js", "highlights.js", "inquiry.js" ],
 			"css": ["styles.css"],
 			"run_at": "document_end"
 		},
@@ -60,7 +66,7 @@
 			             "*://lichess.dev/broadcast/*",
 			             "*://lichess.org/team/*",
 			             "*://lichess.dev/team/*"],
-			"js": [ "jquery.min.js", "chat.js" ],
+			"js": [ "jquery.min.js", "chat.js", "inquiry.js" ],
 			"run_at": "document_end"
 		}
 	]
