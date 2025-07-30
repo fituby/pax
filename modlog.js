@@ -209,7 +209,7 @@ var modlog_btns = {
 
 function modlog_btn_clicked(btn_id) {
     const btn = $(`#${btn_id}`);
-    if (!btn)
+    if (!btn.length)
         return;
 
     if (btn.is('.pax-active'))

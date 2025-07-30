@@ -19,7 +19,7 @@ var note_btns = {
 
 function note_btn_clicked(btn_id) {
     const btn = $(`#${btn_id}`);
-    if (!btn)
+    if (!btn.length)
         return;
 
     if (btn.is('.pax-active'))
@@ -121,11 +121,11 @@ function add_note_buttons() {
     });
     if (btns.length) {
         const total = num['pax-notes-mod'] + num['pax-notes-dox'] + num['pax-notes-std'];
-        btns.push(`<button id="pax-notes-total" class="btn-rack__btn">Total: ${total}</button>`);
         const note_buttons = `<div style="display: flex; margin-top: 10px;">
             <h2 style="padding-right: 1em; align-self: end;">Notes</h2>
             <div class="btn-rack" style="border: 0;">
                 ${btns.join("")}
+                <button id="pax-notes-total" class="btn-rack__btn">Total: ${total}</button>
             </div>
         </div>`;
         $(note_buttons).insertAfter('.note-form');

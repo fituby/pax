@@ -68,6 +68,19 @@
 			             "*://lichess.dev/team/*"],
 			"js": [ "jquery.min.js", "chat.js", "inquiry.js" ],
 			"run_at": "document_end"
+		},
+		{
+			"matches": [ "*://lichess.org/mod/table",
+			             "*://lichess.dev/mod/table"],
+			"js": [ "jquery.min.js", "permits.js" ],
+			"css": ["styles.css"],
+			"run_at": "document_end"
+		},
+		{
+			"matches": [ "*://lichess.org/mod/log*",
+			             "*://lichess.dev/mod/log*"],
+			"js": [ "jquery.min.js", "log.js" ],
+			"run_at": "document_end"
 		}
 	]
 }
