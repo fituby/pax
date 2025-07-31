@@ -25,11 +25,11 @@ if (num_team_msgs_author + num_team_msgs_others) {
 btns_priv.push(`<button id="pax-scrollbars-priv" class="btn-rack__btn pax-inactive">Scrollbars</button>`);
 
 const comms_buttons = `<div>
-	<div class="btn-rack" style="margin-right: 10px;">
+	<div id="pax-chats-bar" class="btn-rack" style="margin-right: 10px;">
 	    <span>Chats:</span>
 	    ${btns_chat.join("")}
 	</div>
-	<div class="btn-rack">
+	<div id="pax-inbox-bar" class="btn-rack">
 		<span>Inbox:</span>
 	    ${btns_priv.join("")}
 	</div>
@@ -94,6 +94,8 @@ function show_only_author_msgs() {
 	}
 }
 
+$('#pax-chats-bar').remove();
+$('#pax-inbox-bar').remove();
 $(comms_buttons).insertAfter('.mod-timeline');
 $('#pax-scrollbars-priv').click(scrollbars_priv);
 $('#pax-scrollbars-chat').click(scrollbars_chat);

@@ -10,7 +10,7 @@ $('#inquiry .links .view-games > div').css('overflow', "auto");
 $('#inquiry .dropper > div').css('overflow', "auto");
 
 $('#inquiry .docs.reports .expendable').css('width', "fit-content").css('max-height', "85vh");
-$('#inquiry .docs.reports .expendable .doc.report .atom').css('width', "70vw");
+$('#inquiry .docs.reports .expendable .doc.report .atom').css('max-width', "70vw");
 
 for (const section of ['engine', 'booster', 'shadowban', 'alt']) {
     $(`#inquiry .actions .dropper.${section} .separator`).hide();

@@ -42,12 +42,12 @@ function create_group(group, options) {
     $(`.appeal-presets-${group}`).change(function() {
         const text_to_add = $('option:selected', this).attr('title');
         if (text_to_add) {
-            let curr_text = $('textarea#form3-text').val().trimEnd();
+            let curr_text = $('.form-group > textarea#form3-text').val().trimEnd();
             if (curr_text.search(text_to_add) >= 0)
                 return;
             if (curr_text.length)
                 curr_text += "\n\n";
-            $('textarea#form3-text').val(curr_text + text_to_add);
+            $('.form-group > textarea#form3-text').val(curr_text + text_to_add);
         }
     });
 }
@@ -75,7 +75,7 @@ async function fetch_user(url) {
     const data = await response.text();
     const note_zone = $(data).find('.note-zone');
     if (note_zone.length == 1 && note_zone.find('.note').length) {
-        note_zone.addClass('pax-note-zone').insertAfter('#mz_others');
+        note_zone.addClass('pax-note-zone').attr('id', "pax-note-list").insertAfter('.mod-zone-full');
         $('.note').not('#inquiry .note').addClass('pax-note');
         add_note_buttons();
         if ($('#inquiry').length) {
@@ -86,8 +86,81 @@ async function fetch_user(url) {
             });
         }
         $('.note-zone form').hide();
-        $('<h2>Appeal messages</h2>').insertAfter('.note-zone');
     }
+}
+
+function reports_btn_clicked(report_type) {
+    const btn = $(`#pax-reports-${report_type}`);
+    if (!btn.length)
+        return;
+
+    if (btn.is('.pax-active'))
+        btn.removeClass('pax-active').addClass('pax-inactive');
+    else
+        btn.removeClass('pax-inactive').addClass('pax-active');
+
+    const reports = $('#pax-report-list .report h3 strong').filter(function() {
+        return report_type == $(this).text();
+    }).closest('.report');
+    if (btn.is('.pax-active'))
+        reports.hide();
+    else
+        reports.show();
+}
+
+function reports_total_clicked() {
+    let num_active = 0;
+    let num_inactive = 0;
+    $('.pax-report-btn').each(function (i, o) {
+        if ($(this).is('.pax-active'))
+            num_active++;
+        else
+            num_inactive++;
+    });
+    $('.pax-report-btn').each(function (i, o) {
+        if (num_active >= num_inactive && $(this).is('.pax-active'))
+            $(this).trigger("click");
+        else if (num_active < num_inactive && !$(this).is('.pax-active'))
+            $(this).trigger("click");
+    });
+}
+
+// Mod zone
+if ($('.mod-zone-full').length == 1) {
+    $('.mod-zone-full').removeClass('none');
+    $('#mz_others').appendTo('.mod-zone-full');
+}
+const config_mz_full = { childList: true, subtree: false };
+const callback_mz_full = (mutationList, observer) => {
+    for (const mutation of mutationList) {
+        if (mutation.type === "childList") {
+            for (const node of mutation.addedNodes) {
+                if (!['mz_others', 'mz_identification', 'mz_timeline',
+                      'pax-load-more', 'pax-note-list', 'pax-report-list'].includes(node.id))
+                    $(node).remove();
+                else if (node.id == 'mz_timeline') {
+                    $('#pax-load-more').hide();
+                    $('.mod-timeline').css('padding', "0 1em 0 2em");
+                    add_modlog_buttons();
+                    $.each(modlog_btns, function (btn_id, d) {
+                        const btn = $(`#${btn_id}`);
+                        if (btn.is('.pax-inactive'))
+                            btn.trigger("click");
+                    });
+                }
+            }
+        }
+    }
+};
+const observer_mz_full = new MutationObserver(callback_mz_full);
+$('.mod-zone-full').first().each(function(i, o) {
+    observer_mz_full.observe(o, config_mz_full);
+});
+$('#pax-load-more').remove();
+if ($('a.more-others').length) {
+    let btn_more = `<span id="pax-load-more"><button class="button button-thin">Load more</button></span>`;
+    $(btn_more).insertBefore('#mz_others');
+    $('#pax-load-more button').click(() => { $('a.more-others').get(0).click(); });
 }
 
 // Add styles
@@ -98,13 +171,55 @@ $('.appeal__msg--mod a.user-link').filter(function() {
     return href && href.toLowerCase().endsWith(`/${my_id}`);
 }).closest('.appeal__msg--mod').css('background', "var(--m-secondary_bg--mix-15)");
 
+// Add reports
+$('#pax-report-list').remove();
+$('#pax-reports-bar').remove();
+if ($('#inquiry .docs.reports .expendable .report strong').length) {
+    $('#inquiry .docs.reports .expendable').first().clone().attr('id', "pax-report-list").insertAfter('.mod-zone-full');
+    $('#pax-report-list .report').first().remove();
+    $('#pax-report-list').css('margin-bottom', "2em").css('padding-bottom', "1em");
+    let reports = {};
+    $('#pax-report-list .report h3 strong').each(function(i, o) {
+        const t = $(this).text();
+        reports[t] = reports[t] ? reports[t] + 1 : 1;
+    });
+    let total = $('#pax-report-list .report h3 strong').length;
+    let report_btns = [];
+    $.each(reports, function (name, num) {
+        report_btns.push(`<button id="pax-reports-${name}" class="btn-rack__btn pax-active pax-report-btn">${name}: ${num}</button>`);
+    });
+    const report_buttons = `<div id="pax-reports-bar" style="display: flex; margin-top: 10px;">
+        <h2 style="padding-right: 1em; align-self: end;">Reports</h2>
+        <div class="btn-rack" style="border: 0;">
+            ${report_btns.join("")}
+            <button id="pax-reports-total" class="btn-rack__btn">Total: ${total}</button>
+        </div>
+    </div>`;
+    $(report_buttons).insertBefore('#pax-report-list');
+    if ($("#inquiry .score.green").length) {
+        for (const style_name of ['background-color', 'display', 'white-space', 'font-weight', 'font-size', 'padding', 'border-radius']) {
+            const style = $("#inquiry .score.green").first().css(style_name);
+            $("#pax-report-list .score").css(style_name, style);
+        }
+    }
+    $.each(reports, function (name, num) {
+        $(`#pax-reports-${name}`).click(() => { reports_btn_clicked(`${name}`); });
+    });
+    $('#pax-reports-total').click(reports_total_clicked);
+    $('#pax-report-list .report').hide();
+}
+
 // Add notes
 if (location.pathname.includes('/appeal/'))
     fetch_user(location.pathname.replace('/appeal/', "/@/"));
 
+// Appeal messages
+$('#pax-appeal-msgs-header').remove();
+$('<h2 id="pax-appeal-msgs-header">Appeal messages</h2>').insertBefore('.body');
+
 // Presets
 var custom_preset_options = {};
-if ($('textarea#form3-text').length && !$('.appeal-preset-alt').length) {
+if ($('.form-group > textarea#form3-text').length && !$('.appeal-preset-alt').length) {
     // Default presets
     const presets = $('.appeal-presets').attr("id", "appeal-presets");
     $(`.appeal-presets`).css('width', "10em");

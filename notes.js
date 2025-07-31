@@ -81,6 +81,7 @@ function note_total_clicked() {
 }
 
 function add_note_buttons() {
+    $('#pax-notes-bar').remove();
     $('.note').not('#inquiry .note').css('padding-left', "1em");
     let num = {};
     $.each(note_btns, function (btn_id, d) {
@@ -121,7 +122,7 @@ function add_note_buttons() {
     });
     if (btns.length) {
         const total = num['pax-notes-mod'] + num['pax-notes-dox'] + num['pax-notes-std'];
-        const note_buttons = `<div style="display: flex; margin-top: 10px;">
+        const note_buttons = `<div id="pax-notes-bar" style="display: flex; margin-top: 10px;">
             <h2 style="padding-right: 1em; align-self: end;">Notes</h2>
             <div class="btn-rack" style="border: 0;">
                 ${btns.join("")}

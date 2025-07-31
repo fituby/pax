@@ -205,6 +205,8 @@ var modlog_btns = {
                       sel: '.mod-timeline__event__action--chatTimeout'},
     'pax-mod_msgs':  {name: "Mod msgs",
                       sel: '.mod-timeline__event--modlog .mod-timeline__event__action--modMessage:not(.mod-timeline__event__action--warning)'},
+    'pax-init':      {name: "Init",
+                      sel: '.mod-timeline__event--account-creation, .mod-timeline__event__action--reopenAccount, .mod-timeline__event__action--selfCloseAccount'}
 };
 
 function modlog_btn_clicked(btn_id) {
@@ -267,7 +269,7 @@ function add_modlog_buttons() {
     });
     const total = $('.mod-timeline__event').length;
     btns.push(`<button id="pax-total" class="btn-rack__btn">Total: ${total}</button>`);
-    const pax_buttons = `<div id="pax-modlog-btns" class="btn-rack">${btns.join("")}</div>`;
+    const pax_buttons = `<div id="pax-modlog-btns" class="btn-rack" style="border: 0;">${btns.join("")}</div>`;
     $(pax_buttons).insertBefore('.mod-timeline');
     for (const btn_id of btn_ids) {
         $(`#${btn_id}`).click(() => { modlog_btn_clicked(btn_id); });
@@ -388,39 +390,3 @@ function add_modlog_actions() {
         }).on("click keyup", disable_kid_msg);
     }
 }
-
-function init_modlog() {
-    if (!$('#pax-modlog-info').length) {
-        add_modlog_info();
-        add_modlog_buttons();
-        add_modlog_actions();
-    }
-}
-
-const config_modlog = { attributes: false, childList: true, subtree: false };
-const mod_zone_callback = (mutationList, observer) => {
-    let is_timeline = false;
-    let is_actions = false;
-    for (const mutation of mutationList) {
-        if (mutation.type === "childList") {
-            for (const node of mutation.addedNodes) {
-                if (!is_timeline && node.id == "mz_timeline") {
-                    is_timeline = true;
-                    setTimeout(() => { init_modlog(); });
-                }
-                if (!is_actions && node.id == "mz_actions") {
-                    is_actions = true;
-                    setTimeout(() => { add_modlog_actions(); });
-                }
-            }
-        }
-    }
-};
-const observer_modlog = new MutationObserver(mod_zone_callback);
-$('.mod-zone').each(function(i, o) {
-    observer_modlog.observe(o, config_modlog);
-    if (!$(this).is('.none')) {
-        setTimeout(() => { init_modlog(); }, 500);
-        setTimeout(() => { init_modlog(); }, 2000);
-    }
-});

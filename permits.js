@@ -82,6 +82,7 @@ function permits_total_clicked() {
         btn.trigger("click");
 }
 
+$('#pax-permits-bar').remove()
 let permits_btns = [];
 let num = {other: 0};
 $('#mod_table .slist td a:not(.user-link)').each(function(i, o) {
@@ -104,7 +105,7 @@ $.each(permits, function (name, d) {
                        </button>`);
 });
 const num_total = $('#mod_table .slist td a:not(.user-link)').length;
-const permits_buttons = `<div class="btn-rack" style="display: flex; margin-top: 10px; border: 0;">
+const permits_buttons = `<div id="pax-permits-bar" class="btn-rack" style="display: flex; margin-top: 10px; border: 0;">
     ${permits_btns.join("")}
     <button id="pax-permits-other" class="btn-rack__btn pax-inactive" title="Everything else">Other: ${num['other']}</button>
     <button id="pax-permits-total" class="btn-rack__btn">Total: ${num_total}</button>
