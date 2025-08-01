@@ -25,11 +25,11 @@ if (num_team_msgs_author + num_team_msgs_others) {
 btns_priv.push(`<button id="pax-scrollbars-priv" class="btn-rack__btn pax-inactive">Scrollbars</button>`);
 
 const comms_buttons = `<div>
-	<div id="pax-chats-bar" class="btn-rack" style="margin-right: 10px;">
+	<div id="pax-chats-bar" class="btn-rack" style="margin-right: 10px; border: 0;">
 	    <span>Chats:</span>
 	    ${btns_chat.join("")}
 	</div>
-	<div id="pax-inbox-bar" class="btn-rack">
+	<div id="pax-inbox-bar" class="btn-rack" style="border: 0;">
 		<span>Inbox:</span>
 	    ${btns_priv.join("")}
 	</div>
