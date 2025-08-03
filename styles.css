@@ -30,3 +30,7 @@
     overflow-wrap: break-word;
     word-break: break-word;
 }
+
+.pax-hover {
+    background: var(--m-secondary_bg--mix-20) !important;
+}

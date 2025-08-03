@@ -390,3 +390,78 @@ function add_modlog_actions() {
         }).on("click keyup", disable_kid_msg);
     }
 }
+
+function clear_pax_hover() {
+    $('#mz_identification tr.pax-hover').removeClass('pax-hover');
+    $('#mz_others tr').removeClass('pax-hover').removeClass('none');
+}
+
+function add_hover(source, dest) {
+    $(`${source} tbody tr`).on("mouseover", function() {
+        if ($('#mz_identification tbody tr.selected').length)
+            return;
+        clear_pax_hover();
+        $(this).addClass('pax-hover');
+        const timestamp = $(this).find('td > time').parent().data("sort");
+        if (!timestamp)
+            return;
+        $(`${dest} tbody td[data-sort="${timestamp}"] time`).closest('tr').each(function(i, o) {
+            $(o).addClass('pax-hover');
+        });
+    });
+    $(`${source} tbody tr`).on("mouseleave", clear_pax_hover);
+}
+
+function update_others() {
+    // Usertable
+    $('#mz_others tbody tr').on("mouseover", function() {
+        if ($('#mz_identification tbody tr.selected').length)
+            return;
+        clear_pax_hover();
+        $(this).addClass('pax-hover');
+        const tags = $(this).data("tags");
+        if (!tags)
+            return;
+        $('#mz_identification tbody tr').each(function(i, o) {
+            if (tags.includes($(o).data('value')))
+                $(o).addClass('pax-hover');
+        });
+        $('.spy_fps tbody tr').each(function(i, o) {
+            if (tags.includes($(o).data('value'))) {
+                const timestamp = $(o).find('td > time').parent().data('sort');
+                if (timestamp)
+                    $(`.spy_uas tbody td[data-sort="${timestamp}"] time`).closest('tr').addClass('pax-hover');
+            }
+        });
+    });
+    $('#mz_others tbody tr').on("mouseleave", clear_pax_hover);
+
+    // Devices
+    $('.spy_uas tbody tr').on("mouseover", function() {
+        if ($('#mz_identification tbody tr.selected').length)
+            return;
+        clear_pax_hover();
+        $(this).addClass('pax-hover');
+        const timestamp = $(this).find('td > time').parent().data("sort");
+        if (!timestamp)
+            return;
+        $(`.spy_fps tbody td[data-sort="${timestamp}"] time`).closest('tr').each(function(i, o) {
+            $(o).addClass('pax-hover');
+            const tag = $(o).data('value');
+            if (!tag)
+                return;
+            $('#mz_others tbody tr').filter(function(j) {
+                return !($(this).data('tags') || "").includes(tag);
+            }).addClass('none');
+        });
+    });
+    $('.spy_uas tbody tr').on("mouseleave", clear_pax_hover);
+
+    // All tables
+    add_hover('.spy_locs', '#identification_screen');
+    add_hover('#identification_screen', '.spy_locs');
+    add_hover('.spy_fps', '.spy_uas');
+    $('.spy_locs tbody tr').on('click', clear_pax_hover);
+    $('#identification_screen tbody tr').on('click', clear_pax_hover);
+    $('.spy_fps tbody tr').on('click', clear_pax_hover);
+}

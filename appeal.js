@@ -170,6 +170,8 @@ $('.appeal__msg--mod a.user-link').filter(function() {
     const href = $(this).attr('href');
     return href && href.toLowerCase().endsWith(`/${my_id}`);
 }).closest('.appeal__msg--mod').css('background', "var(--m-secondary_bg--mix-15)");
+$('.appeal__msg').css('padding', "1em 1em").css('margin-bottom', "1em");
+$('.appeal__msg__header').css('margin-bottom', "1em");
 
 // Add reports
 $('#pax-report-list').remove();
