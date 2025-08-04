@@ -9,29 +9,27 @@ function init_modlog() {
         add_modlog_buttons();
         add_modlog_actions();
         update_others();
+        update_identification();
     }
 }
 
 const config_modlog = { attributes: false, childList: true, subtree: false };
 const callback_mod_zone = (mutationList, observer) => {
-    let is_timeline = false;
-    let is_actions = false;
-    let is_others = false;
+    let is_updated = {};
     for (const mutation of mutationList) {
         if (mutation.type === "childList") {
             for (const node of mutation.addedNodes) {
-                if (!is_timeline && node.id == "mz_timeline") {
-                    is_timeline = true;
+                if (is_updated[node.id])
+                    continue;
+                is_updated[node.id] = true;
+                if (node.id == "mz_timeline")
                     setTimeout(() => { init_modlog(); });
-                }
-                if (!is_actions && node.id == "mz_actions") {
-                    is_actions = true;
+                else if (node.id == "mz_actions")
                     setTimeout(() => { add_modlog_actions(); });
-                }
-                if (!is_others && node.id == "mz_others") {
-                    is_others = true;
+                else if (node.id == "mz_others")
                     setTimeout(() => { update_others(); });
-                }
+                else if (node.id == 'mz_identification')
+                    setTimeout(() => { update_identification(); });
             }
         }
     }

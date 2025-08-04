@@ -303,7 +303,7 @@ function add_modlog_actions() {
     $('.pm-preset:not(.pm-preset-warn) option:contains("Warning")').appendTo('.pm-preset-warn select');
 
     // Name+Close
-    const close_name = `<button id="pax-name-close" class="btn-rack__btn" style="border: 0; margin: 1px;" title='Alt+Close this account + add note \"name\"'>Name+Alt</button>`;
+    const close_name = `<button id="pax-name-close" class="btn-rack__btn" style="border: 0; margin: 1px;" title='Alt+Close this account + add note \"name\"' data-icon="">Name</button>`;
     const add_action_btns = `<div id="pax-add-actions" class="btn-rack">${close_name}</div>`;
     $(add_action_btns).insertBefore('.pm-preset:not(.pm-preset-warn)');
     const btn_alt = $('.btn-rack__btn:not(#pax-name-close):not(.active):contains("Alt")');
@@ -393,7 +393,9 @@ function add_modlog_actions() {
 
 function clear_pax_hover() {
     $('#mz_identification tr.pax-hover').removeClass('pax-hover');
-    $('#mz_others tr').removeClass('pax-hover').removeClass('none');
+    $('#mz_others tr').removeClass('pax-hover');
+    if (!$('#mz_identification tbody tr.selected').length)
+        $('#mz_others tr').removeClass('none');
 }
 
 function add_hover(source, dest) {
@@ -435,7 +437,9 @@ function update_others() {
         });
     });
     $('#mz_others tbody tr').on("mouseleave", clear_pax_hover);
+}
 
+function update_identification() {
     // Devices
     $('.spy_uas tbody tr').on("mouseover", function() {
         if ($('#mz_identification tbody tr.selected').length)

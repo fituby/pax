@@ -110,7 +110,7 @@ function add_note_buttons() {
         num['pax-notes-mine']++;
         const bkg = note_btns['pax-notes-mine'].bkg;
         if (bkg)
-            $(this).closest('.note__meta').css('background', bkg);
+            $(this).css('text-shadow', "0 0 5px #ffae34,0 0 6.25px #ec760c,0 0 7.5px #cd4606");
     });
     // Add buttons
     let btns = [];

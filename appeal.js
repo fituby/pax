@@ -138,6 +138,10 @@ const callback_mz_full = (mutationList, observer) => {
                 if (!['mz_others', 'mz_identification', 'mz_timeline',
                       'pax-load-more', 'pax-note-list', 'pax-report-list'].includes(node.id))
                     $(node).remove();
+                else if (node.id == "mz_others")
+                    setTimeout(() => { update_others(); });
+                else if (node.id == 'mz_identification')
+                    setTimeout(() => { update_identification(); });
                 else if (node.id == 'mz_timeline') {
                     $('#pax-load-more').hide();
                     $('.mod-timeline').css('padding', "0 1em 0 2em");

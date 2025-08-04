@@ -1,5 +1,4 @@
 const team_msg = "You received this because you are subscribed to messages of the team https://lichess.org/team/";
-//const team_msg_old = "You received this message because you are part of the team lichess.org/team/"
 
 const num_team_msgs_author = $(`.post.author:contains(${team_msg})`).length;
 const num_team_msgs_others = $(`.post:not(.author):contains(${team_msg})`).length;
