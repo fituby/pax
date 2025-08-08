@@ -126,10 +126,7 @@ function reports_total_clicked() {
 }
 
 // Mod zone
-if ($('.mod-zone-full').length == 1) {
-    $('.mod-zone-full').removeClass('none');
-    $('#mz_others').appendTo('.mod-zone-full');
-}
+move_modzone_elements();
 const config_mz_full = { childList: true, subtree: false };
 const callback_mz_full = (mutationList, observer) => {
     for (const mutation of mutationList) {
@@ -160,12 +157,6 @@ const observer_mz_full = new MutationObserver(callback_mz_full);
 $('.mod-zone-full').first().each(function(i, o) {
     observer_mz_full.observe(o, config_mz_full);
 });
-$('#pax-load-more').remove();
-if ($('a.more-others').length) {
-    let btn_more = `<span id="pax-load-more"><button class="button button-thin">Load more</button></span>`;
-    $(btn_more).insertBefore('#mz_others');
-    $('#pax-load-more button').click(() => { $('a.more-others').get(0).click(); });
-}
 
 // Add styles
 $('.appeal__msg--mod').css('background', "var(--m-primary_bg--mix-15)");

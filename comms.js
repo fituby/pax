@@ -114,6 +114,7 @@ if (num_team_msgs_others || num_team_msgs_author)
     hide_team_msgs();
 
 if (!$('#pax-modlog-info').length) {
+    move_modzone_elements();
     add_modlog_info();
     add_modlog_buttons();
 }

@@ -39,7 +39,7 @@
 		{
 			"matches": [ "*://lichess.org/mod/*/communication",
 			             "*://lichess.dev/mod/*/communication"],
-			"js": [ "jquery.min.js", "modlog.js", "timeline.js", "inquiry.js" ],
+			"js": [ "jquery.min.js", "modlog.js", "timeline.js", "pubcomm.js", "inquiry.js" ],
 			"css": ["styles.css"],
 			"run_at": "document_end"
 		},

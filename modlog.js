@@ -469,3 +469,26 @@ function update_identification() {
     $('#identification_screen tbody tr').on('click', clear_pax_hover);
     $('.spy_fps tbody tr').on('click', clear_pax_hover);
 }
+
+function move_modzone_elements() {
+    if ($('.mod-zone-full').length == 1 && $('.mod-zone-full').is('.none')) {
+        $('.mod-zone-full').removeClass('none');
+        if ($('.mod-timeline').length == 1 && $('#mz_timeline').length == 0 && $('.mod-zone-full .mod-timeline').length == 0) {
+            const mz_timeline = `<div id="mz_timeline" class="mz-section mz-section--timeline" data-rel="timeline"></div>`;
+            $(mz_timeline).appendTo('.mod-zone-full');
+            $('.mod-timeline').appendTo('.mod-zone-full #mz_timeline');
+        }
+        if ($('#mz_others').length == 1 && $('.mod-zone-full #mz_others').length == 0) {
+            $('#mz_others').appendTo('.mod-zone-full');
+            $('#pax-load-more').remove();
+            if ($('a.mod-zone-toggle').length) {
+                let btn_more = `<span id="pax-load-more" style="order: 14;"><button class="button button-thin">Load more</button></span>`;
+                $(btn_more).insertBefore('#mz_others');
+                $('#pax-load-more button').click(() => {
+                    $('a.mod-zone-toggle').get(0).click();
+                    $('a.mod-zone-toggle').get(0).click();
+                });
+            }
+        }
+    }
+}
