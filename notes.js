@@ -80,7 +80,7 @@ function note_total_clicked() {
     });
 }
 
-function add_note_buttons() {
+function add_note_buttons(add_borders = false) {
     $('#pax-notes-bar').remove();
     $('.note').not('#inquiry .note').css('padding-left', "1em");
     let num = {};
@@ -96,8 +96,11 @@ function add_note_buttons() {
             if (!attr.startsWith(d.start) || !attr.endsWith(d.end))
                 return;
             num[btn_id]++;
-            if (d.bkg)
+            if (d.bkg) {
                 $(o).closest('.note').css('background', d.bkg);
+                if (add_borders)
+                    $(o).closest('.note').css('border', "1px solid var(--c-border)");
+            }
         });
     });
     const my_id = $('#user_tag').text().toLowerCase();

@@ -206,7 +206,7 @@ var modlog_btns = {
     'pax-mod_msgs':  {name: "Mod msgs",
                       sel: '.mod-timeline__event--modlog .mod-timeline__event__action--modMessage:not(.mod-timeline__event__action--warning)'},
     'pax-init':      {name: "Init",
-                      sel: '.mod-timeline__event--account-creation, .mod-timeline__event__action--reopenAccount, .mod-timeline__event__action--selfCloseAccount'}
+                      sel: '.mod-timeline__event--account-creation, .mod-timeline__event__action--reopenAccount, .mod-timeline__event__action--selfCloseAccount, .mod-timeline__event__action--setEmail'}
 };
 
 function modlog_btn_clicked(btn_id) {

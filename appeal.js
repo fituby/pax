@@ -77,14 +77,7 @@ async function fetch_user(url) {
     if (note_zone.length == 1 && note_zone.find('.note').length) {
         note_zone.addClass('pax-note-zone').attr('id', "pax-note-list").insertAfter('.mod-zone-full');
         $('.note').not('#inquiry .note').addClass('pax-note');
-        add_note_buttons();
-        if ($('#inquiry').length) {
-            $.each(note_btns, function (btn_id, d) {
-                const btn = $(`#${btn_id}`);
-                if (!btn.is('.pax-active'))
-                    btn.trigger("click");
-            });
-        }
+        add_note_buttons(true);
         $('.note-zone form').hide();
     }
 }
