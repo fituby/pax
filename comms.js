@@ -103,12 +103,14 @@ $('#pax-only-author-posts').click(show_only_author_posts);
 $('#pax-only-author-msgs').click(show_only_author_msgs);
 scrollbars_priv();
 let max_len_chat = 0;
+let sum_len_chat = 0;
 $('.game').each(function(i, o) {
     let len = $(this).find('.line').length;
+    sum_len_chat += len;
     if(len > max_len_chat)
         max_len_chat = len;
 });
-if (max_len_chat < 40)
+if (max_len_chat < 80 || sum_len_chat < 800)
     scrollbars_chat();
 if (num_team_msgs_others || num_team_msgs_author)
     hide_team_msgs();

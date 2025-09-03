@@ -1,9 +1,9 @@
 const permits = {
-    'Admin':    {regex: /\b(Super Admin|Admin|Lila settings|Process title requests)\b/g,
+    'Admin':    {regex: /\b(Super Admin|Admin|Lila settings|Command line|Process title requests)\b/g,
                  color: "var(--c-interesting)"},
     'Mod':      {regex: /\b(Cheat Hunter|Boost Hunter|Shusher|View player insights)\b/g,
                  color: "var(--c-bad)"},
-    'Modding':  {regex: /\b(Timeout mod|Moderate \w+|Give free patron|Send mod messages|See reports|Mod notes|View blurs|User profile mod view)\b/g,
+    'Modding':  {regex: /\b(Timeout mod|Moderate \w+|Give free patron|Mark as \w+|Shadowban|See mod log|Mod user search|Send mod messages|See reports|Mod notes|View blurs|User profile mod view|Diagnostics|Developer Team)\b/g,
                  color: "var(--c-warn)"},
     'Manager':  {regex: /\b(Manage \w+)\b/g,
                  color: "var(--c-brag)"},

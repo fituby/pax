@@ -206,6 +206,7 @@ if (location.pathname.includes('/appeal/'))
 // Appeal messages
 $('#pax-appeal-msgs-header').remove();
 $('<h2 id="pax-appeal-msgs-header">Appeal messages</h2>').insertBefore('.body');
+$(".form-actions a[href='/mod/presets/appeal']").hide();
 
 // Presets
 var custom_preset_options = {};
