@@ -206,7 +206,7 @@ var modlog_btns = {
     'pax-mod_msgs':  {name: "Mod msgs",
                       sel: '.mod-timeline__event--modlog .mod-timeline__event__action--modMessage:not(.mod-timeline__event__action--warning)'},
     'pax-init':      {name: "Init",
-                      sel: '.mod-timeline__event--account-creation, .mod-timeline__event__action--reopenAccount, .mod-timeline__event__action--selfCloseAccount, .mod-timeline__event__action--setEmail'}
+                      sel: '.mod-timeline__event--account-creation, .mod-timeline__event__action--reopenAccount, .mod-timeline__event__action--selfCloseAccount, .mod-timeline__event__action--setEmail, .mod-timeline__event__action--setPassword, .mod-timeline__event__action--blankedPassword'}
 };
 
 function modlog_btn_clicked(btn_id) {
@@ -288,10 +288,6 @@ function disable_name_close() {
     $('#pax-name-close').prop('disabled', true);
 }
 
-function disable_kid_msg() {
-    $('#pax-kid-msg').prop('disabled', true);
-}
-
 function add_modlog_actions() {
     if ($('.pm-preset-warn').length)
         return;
@@ -335,59 +331,6 @@ function add_modlog_actions() {
         });
         btn_alt.on("click keyup", disable_name_close);
         btn_close.on("click keyup", disable_name_close);
-    }
-
-    // Kid+Msg
-    let num_btn_kid = 0;
-    $('.btn-rack__btn:not(.active):contains("Kid")').each(function(i, o) {
-        if ($(this).text() == "Kid") {
-            $(this).removeClass('yes-no-confirm');
-            num_btn_kid++;
-        }
-    });
-    const kid_msg = `<button id="pax-kid-msg" class="btn-rack__btn" style="border: 0; margin: 1px;" title='Kid mode + Mod message'>Kid+Msg</button>`;
-    $(kid_msg).appendTo('#pax-add-actions');
-    if (num_btn_kid != 1) {
-        disable_kid_msg();
-    }
-    else {
-        $('#pax-kid-msg').click(function() {
-            const note_form = $('.note-form');
-            if (note_form.length != 1)
-                return;
-            const note_action = $('.note-form').attr('action');
-            if (!note_action)
-                return;
-            const btn_kid = $('.btn-rack__btn:not(.active)').filter(function(i) {
-                return $(this).text() == "Kid";
-            });
-            if (btn_kid.length != 1)
-                return;
-            const kid_action = btn_kid.parent().attr('action');
-            if (!kid_action)
-                return;
-            const msg_kid = $('.pm-preset:not(.pm-preset-warn) option:contains("kid mode")');
-            if (msg_kid.length != 1)
-                return;
-            const val_msg_kid = msg_kid.attr('value');
-            if (!val_msg_kid)
-                return;
-            const msg_action = $('.pm-preset:not(.pm-preset-warn)').attr('action');
-            if (!msg_action)
-                return;
-            const ok = confirm('Kid mode + Mod message?');
-            if (!ok)
-                return;
-            $.post(kid_action, function() {
-                disable_kid_msg();
-                $.post(`${msg_action}${val_msg_kid}`, function() {
-                    location.reload();
-                });
-            });
-        });
-        $('.btn-rack__btn:not(.active)').filter(function(i) {
-            return $(this).text() == "Kid";
-        }).on("click keyup", disable_kid_msg);
     }
 }
 

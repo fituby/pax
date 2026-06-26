@@ -11,7 +11,6 @@ if (num_chat_msgs - num_chat_msgs_author) {
     const text_msgs = `Others' msgs: ${num_chat_msgs - num_chat_msgs_author} of ${num_chat_msgs}`;
     btns_chat.push(`<button id="pax-only-author-msgs" class="btn-rack__btn pax-inactive">${text_msgs}</button>`);
 }
-btns_chat.push(`<button id="pax-scrollbars-chat" class="btn-rack__btn pax-inactive">Scrollbars</button>`);
 let btns_priv = [];
 if (num_priv_msgs - num_priv_msgs_author) {
     const text_msgs = `Others' msgs: ${num_priv_msgs - num_priv_msgs_author} of ${num_priv_msgs}`;
@@ -21,7 +20,6 @@ if (num_team_msgs_author + num_team_msgs_others) {
     const text_msgs = `Team msgs: ${num_team_msgs_author}+${num_team_msgs_others}`;
     btns_priv.push(`<button id="pax-team-msgs" class="btn-rack__btn pax-inactive">${text_msgs}</button>`);
 }
-btns_priv.push(`<button id="pax-scrollbars-priv" class="btn-rack__btn pax-inactive">Scrollbars</button>`);
 
 const comms_buttons = `<div>
 	<div id="pax-chats-bar" class="btn-rack" style="margin-right: 10px; border: 0;">
@@ -33,28 +31,6 @@ const comms_buttons = `<div>
 	    ${btns_priv.join("")}
 	</div>
 </div>`;
-
-function scrollbars_priv() {
-	if ($('#pax-scrollbars-priv').is('.pax-active')) {
-		$('#pax-scrollbars-priv').removeClass('pax-active').addClass('pax-inactive');
-		$(".thread").css("max-height", "300px");
-	}
-	else {
-		$('#pax-scrollbars-priv').removeClass('pax-inactive').addClass('pax-active');
-		$(".thread").css("max-height", "none");
-	}
-}
-
-function scrollbars_chat() {
-	if ($('#pax-scrollbars-chat').is('.pax-active')) {
-		$('#pax-scrollbars-chat').removeClass('pax-active').addClass('pax-inactive');
-		$(".chat").css("height", "15em");
-	}
-	else {
-		$('#pax-scrollbars-chat').removeClass('pax-inactive').addClass('pax-active');
-		$(".chat").css("height", "auto");
-	}
-}
 
 function hide_team_msgs() {
 	if ($('#pax-team-msgs').is('.pax-active')) {
@@ -96,12 +72,10 @@ function show_only_author_msgs() {
 $('#pax-chats-bar').remove();
 $('#pax-inbox-bar').remove();
 $(comms_buttons).insertAfter('.mod-timeline');
-$('#pax-scrollbars-priv').click(scrollbars_priv);
-$('#pax-scrollbars-chat').click(scrollbars_chat);
 $('#pax-team-msgs').click(hide_team_msgs);
 $('#pax-only-author-posts').click(show_only_author_posts);
 $('#pax-only-author-msgs').click(show_only_author_msgs);
-scrollbars_priv();
+$(".thread").css("max-height", "none"); // Remove scrollbars in private chats
 let max_len_chat = 0;
 let sum_len_chat = 0;
 $('.game').each(function(i, o) {
@@ -110,8 +84,7 @@ $('.game').each(function(i, o) {
     if(len > max_len_chat)
         max_len_chat = len;
 });
-if (max_len_chat < 80 || sum_len_chat < 800)
-    scrollbars_chat();
+$(".chat").css("height", (max_len_chat < 80 || sum_len_chat < 800) ? "auto" : "15em");
 if (num_team_msgs_others || num_team_msgs_author)
     hide_team_msgs();
 
