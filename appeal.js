@@ -152,12 +152,12 @@ $('.mod-zone-full').first().each(function(i, o) {
 });
 
 // Add styles
-$('.appeal__msg--mod').css('background', "var(--m-primary_bg--mix-15)");
+$('.appeal__msg--mod').css('background', "color-mix(var(--c-primary) 20%, var(--c-bg))");
 const my_id = $('#user_tag').text().toLowerCase();
 $('.appeal__msg--mod a.user-link').filter(function() {
     const href = $(this).attr('href');
     return href && href.toLowerCase().endsWith(`/${my_id}`);
-}).closest('.appeal__msg--mod').css('background', "var(--m-secondary_bg--mix-15)");
+}).closest('.appeal__msg--mod').css('background', "color-mix(var(--c-secondary) 20%, var(--c-bg))");
 $('.appeal__msg').css('padding', "1em 1em").css('margin-bottom', "1em");
 $('.appeal__msg__header').css('margin-bottom', "1em");
 

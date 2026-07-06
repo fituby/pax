@@ -1,11 +1,11 @@
 .pax-active {
-    background: var(--m-accent--fade-80) !important;
+    background: hsl(from var(--c-accent) h s l / 0.5) !important;
     border: 0;
     margin: 1px;
     text-shadow: unset !important;
 }
 .pax-inactive {
-    background: var(--m-secondary--fade-60) !important;
+    background: hsl(from var(--c-secondary) h s l / 0.5) !important;
     border: 0;
     margin: 1px;
     text-shadow: unset !important;
@@ -32,5 +32,5 @@
 }
 
 .pax-hover {
-    background: var(--m-secondary_bg--mix-20) !important;
+    background: color-mix(var(--c-secondary) 30%, var(--c-bg)) !important;
 }

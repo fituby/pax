@@ -51,22 +51,22 @@ function count_msgs(data, type, name, sup) {
                 if (report_type == "Boost") {
                     if (type == 'warning') {
                         if (boost_types.includes(txt_type))
-                            highlight_style = "background: var(--m-bad_bg--mix-30);";
+                            highlight_style = "background: color-mix(var(--c-bad) 30%, var(--c-bg));";
                         else if (txt_type == "possible")
-                            highlight_style = "background: var(--m-bad_bg--mix-15);";
+                            highlight_style = "background: color-mix(var(--c-primary) 15%, var(--c-bg));";
                     }
                 }
                 else if (report_type == "Cheat") {
                     if (type == 'action' && txt_type == "game")
-                        highlight_style = "background: var(--m-bad_bg--mix-30);";
+                        highlight_style = "background: color-mix(var(--c-bad) 30%, var(--c-bg));";
                 }
                 else if (report_type == "Comm") {
                     if (type == 'warning' && comm_types.includes(txt_type))
-                        highlight_style = "background: var(--m-bad_bg--mix-30);";
+                        highlight_style = "background: color-mix(var(--c-bad) 30%, var(--c-bg));";
                     else if (type == 'action' && ["chat", "delete", "kid"].includes(txt_type))
-                        highlight_style = "background: var(--m-primary_bg--mix-30);";
+                        highlight_style = "background: color-mix(var(--c-primary) 30%, var(--c-bg));";
                     else if (type == 'action' && txt_type == "shadowban")
-                        highlight_style = "background: var(--m-bad_bg--mix-30);";
+                        highlight_style = "background: color-mix(var(--c-bad) 30%, var(--c-bg));";
                 }
             }
             msg_list.push(`<span style="display: flex; align-items: baseline; ${highlight_style}">
@@ -188,7 +188,7 @@ var modlog_btns = {
     'pax-streamers': {name: "Streamer",
                       sel: '.mod-timeline__event__action--streamerList, .mod-timeline__event__action--streamerunlist, .mod-timeline__event__action--streamerTier'},
     'pax-blogs':     {name: "Blogs",
-                      sel: '.mod-timeline__event__action--blogPostEdit, .mod-timeline__event__action--blogTier'},
+                      sel: '.mod-timeline__event__action--blogPostEdit, .mod-timeline__event__action--blogTier, .mod-timeline__event__action--imagePass, .mod-timeline__event__action--imagePurge'},
     'pax-flaglines': {name: "Flag lines",
                       sel: '.mod-timeline__event--flagged-line'},
     'pax-notes':     {name: "Notes",
@@ -206,7 +206,7 @@ var modlog_btns = {
     'pax-mod_msgs':  {name: "Mod msgs",
                       sel: '.mod-timeline__event--modlog .mod-timeline__event__action--modMessage:not(.mod-timeline__event__action--warning)'},
     'pax-init':      {name: "Init",
-                      sel: '.mod-timeline__event--account-creation, .mod-timeline__event__action--reopenAccount, .mod-timeline__event__action--selfCloseAccount, .mod-timeline__event__action--setEmail, .mod-timeline__event__action--setPassword, .mod-timeline__event__action--blankedPassword'}
+                      sel: '.mod-timeline__event--account-creation, .mod-timeline__event__action--reopenAccount, .mod-timeline__event__action--selfCloseAccount, .mod-timeline__event__action--setEmail, .mod-timeline__event__action--setPassword, .mod-timeline__event__action--blankedPassword, .mod-timeline__event__action--disableTwoFactor, .mod-timeline__event__action--giftPatronMonth, .mod-timeline__event__action--setTitle'}
 };
 
 function modlog_btn_clicked(btn_id) {
