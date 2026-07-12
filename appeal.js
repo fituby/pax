@@ -152,12 +152,12 @@ $('.mod-zone-full').first().each(function(i, o) {
 });
 
 // Add styles
-$('.appeal__msg--mod').css('background', "color-mix(var(--c-primary) 20%, var(--c-bg))");
+$('.appeal__msg--mod').css('background', "color-mix(in oklab, var(--c-primary) 20%, var(--c-bg))");
 const my_id = $('#user_tag').text().toLowerCase();
 $('.appeal__msg--mod a.user-link').filter(function() {
     const href = $(this).attr('href');
     return href && href.toLowerCase().endsWith(`/${my_id}`);
-}).closest('.appeal__msg--mod').css('background', "color-mix(var(--c-secondary) 20%, var(--c-bg))");
+}).closest('.appeal__msg--mod').css('background', "color-mix(in oklab, var(--c-secondary) 20%, var(--c-bg))");
 $('.appeal__msg').css('padding', "1em 1em").css('margin-bottom', "1em");
 $('.appeal__msg__header').css('margin-bottom', "1em");
 
@@ -201,7 +201,7 @@ if ($('#inquiry .docs.reports .expendable .report strong').length) {
 
 // Add notes
 if (location.pathname.includes('/appeal/'))
-    fetch_user(location.pathname.replace('/appeal/', "/@/"));
+    fetch_user(location.pathname.replace(/\/appeal\/([^/]+).*/, '/@/$1'));
 
 // Appeal messages
 $('#pax-appeal-msgs-header').remove();
@@ -210,10 +210,9 @@ $(".form-actions a[href='/mod/presets/appeal']").hide();
 
 // Presets
 var custom_preset_options = {};
-if ($('.form-group > textarea#form3-text').length && !$('.appeal-preset-alt').length) {
+if (false && $('.form-group > textarea#form3-text').length && !$('.appeal-preset-alt').length) {
     // Default presets
     const presets = $('.appeal-presets').attr("id", "appeal-presets");
-    $(`.appeal-presets`).css('width', "10em");
     $.each(appeal_presets, function (group, sel) {
         presets.clone(true, true).removeAttr("id").addClass(`appeal-presets-${group}`).insertBefore("#appeal-presets");
         $(`.appeal-presets-${group} option:not(:contains("Presets"))`).remove();

@@ -2,11 +2,11 @@ var note_btns = {
     'pax-notes-mod':  {name:  "Mod",
                        start: "/note/setDox/",
                        end:   "/true",
-                       bkg:   "color-mix(var(--c-primary) 20%, var(--c-bg))"},
+                       bkg:   "color-mix(in oklab, var(--c-primary) 20%, var(--c-bg))"},
     'pax-notes-dox':  {name:  "Dox",
                        start: "/note/setDox/",
                        end:   "/false",
-                       bkg:   "color-mix(var(--c-bad) 20%, var(--c-bg))"},
+                       bkg:   "color-mix(in oklab, var(--c-bad) 20%, var(--c-bg))"},
     'pax-notes-std':  {name:  "Regular",
                        start: "/note/delete/",
                        end:   "",
@@ -14,7 +14,7 @@ var note_btns = {
     'pax-notes-mine': {name:  "Mine",
                        start: "",
                        end:   "",
-                       bkg:   "color-mix(var(--c-secondary) 20%, var(--c-bg))"}
+                       bkg:   "color-mix(in oklab, var(--c-secondary) 20%, var(--c-bg))"}
 }
 
 function note_btn_clicked(btn_id) {

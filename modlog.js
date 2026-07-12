@@ -51,22 +51,22 @@ function count_msgs(data, type, name, sup) {
                 if (report_type == "Boost") {
                     if (type == 'warning') {
                         if (boost_types.includes(txt_type))
-                            highlight_style = "background: color-mix(var(--c-bad) 30%, var(--c-bg));";
+                            highlight_style = "background: color-mix(in oklab, var(--c-bad) 30%, var(--c-bg));";
                         else if (txt_type == "possible")
-                            highlight_style = "background: color-mix(var(--c-primary) 15%, var(--c-bg));";
+                            highlight_style = "background: color-mix(in oklab, var(--c-primary) 15%, var(--c-bg));";
                     }
                 }
                 else if (report_type == "Cheat") {
                     if (type == 'action' && txt_type == "game")
-                        highlight_style = "background: color-mix(var(--c-bad) 30%, var(--c-bg));";
+                        highlight_style = "background: color-mix(in oklab, var(--c-bad) 30%, var(--c-bg));";
                 }
                 else if (report_type == "Comm") {
                     if (type == 'warning' && comm_types.includes(txt_type))
-                        highlight_style = "background: color-mix(var(--c-bad) 30%, var(--c-bg));";
+                        highlight_style = "background: color-mix(in oklab, var(--c-bad) 30%, var(--c-bg));";
                     else if (type == 'action' && ["chat", "delete", "kid"].includes(txt_type))
-                        highlight_style = "background: color-mix(var(--c-primary) 30%, var(--c-bg));";
+                        highlight_style = "background: color-mix(in oklab, var(--c-primary) 30%, var(--c-bg));";
                     else if (type == 'action' && txt_type == "shadowban")
-                        highlight_style = "background: color-mix(var(--c-bad) 30%, var(--c-bg));";
+                        highlight_style = "background: color-mix(in oklab, var(--c-bad) 30%, var(--c-bg));";
                 }
             }
             msg_list.push(`<span style="display: flex; align-items: baseline; ${highlight_style}">

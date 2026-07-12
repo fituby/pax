@@ -32,5 +32,5 @@
 }
 
 .pax-hover {
-    background: color-mix(var(--c-secondary) 30%, var(--c-bg)) !important;
+    background: color-mix(in oklab, var(--c-secondary) 30%, var(--c-bg)) !important;
 }
