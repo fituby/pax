@@ -82,6 +82,18 @@ async function fetch_user(url) {
     }
 }
 
+async function fetch_table_appeals(url) {
+    if (!url.length)
+        return;
+    const response = await fetch(url);
+    const data = await response.text();
+    const table_appeals = $(data).find('.appeal-list');
+    if (table_appeals.length == 1) {
+        table_appeals.attr('id', "pax-table-appeals").insertAfter('.mod-zone-full');
+        $('<h2 id="pax-appeal-msgs-header">All appeals</h2>').insertAfter('.mod-zone-full');
+    }
+}
+
 function reports_btn_clicked(report_type) {
     const btn = $(`#pax-reports-${report_type}`);
     if (!btn.length)
@@ -160,6 +172,8 @@ $('.appeal__msg--mod a.user-link').filter(function() {
 }).closest('.appeal__msg--mod').css('background', "color-mix(in oklab, var(--c-secondary) 20%, var(--c-bg))");
 $('.appeal__msg').css('padding', "1em 1em").css('margin-bottom', "1em");
 $('.appeal__msg__header').css('margin-bottom', "1em");
+$('p:contains("This appeal is now closed")').css('color', "var(--c-bad)").css('border', "2px solid var(--c-bad)");
+$('p:contains("Appeal paused until")').css('color', "var(--c-brilliant)").css('border', "2px solid var(--c-brilliant)");
 
 // Add reports
 $('#pax-report-list').remove();
@@ -202,6 +216,13 @@ if ($('#inquiry .docs.reports .expendable .report strong').length) {
 // Add notes
 if (location.pathname.includes('/appeal/'))
     fetch_user(location.pathname.replace(/\/appeal\/([^/]+).*/, '/@/$1'));
+
+// All appeals
+$('#pax-appeal-msgs-header').remove();
+$('#pax-table-appeals').remove();
+if ($('.appeal__all').length) {
+    fetch_table_appeals($('.appeal__all').first().attr('href'));
+}
 
 // Appeal messages
 $('#pax-appeal-msgs-header').remove();

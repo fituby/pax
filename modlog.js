@@ -186,7 +186,7 @@ var modlog_btns = {
     'pax-playbans':  {name: "Playbans",
                       sel: '.mod-timeline__event--playban'},
     'pax-streamers': {name: "Streamer",
-                      sel: '.mod-timeline__event__action--streamerList, .mod-timeline__event__action--streamerunlist, .mod-timeline__event__action--streamerTier'},
+                      sel: '.mod-timeline__event__action--streamerList, .mod-timeline__event__action--streamerunlist, .mod-timeline__event__action--streamerTier, .mod-timeline__event__action--streamerDecline'},
     'pax-blogs':     {name: "Blogs",
                       sel: '.mod-timeline__event__action--blogPostEdit, .mod-timeline__event__action--blogTier, .mod-timeline__event__action--imagePass, .mod-timeline__event__action--imagePurge'},
     'pax-flaglines': {name: "Flag lines",
