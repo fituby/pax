@@ -1,12 +1,4 @@
-const appeal_presets = {
-    Cheat: ["Engine ", "Cheat ", ": cheat"],
-    Boost: ["Booster ", "Arena ban ", "Boost ", ": boost"],
-    Shadowban: ["Shadowban "],
-    Alt: [" alt", "IP ban", "admission"],
-    Playban_Ragesit: ["Playban ", "ragesit"],
-    Blog: ["Blogs "]
-};
-var def_presets = {};
+const appeal_presets = new Set(["cheat", "boost", "close", "comm", "rank", "arena", "prize", "blog", "streamer", "warning", "legacy", "chat"]);
 
 var entityMap = {
     '&': '&amp;',
@@ -32,15 +24,9 @@ function getData(obj) {
     return deferred.promise();
 }
 
-function create_group(group, options) {
-    $('#appeal-presets').parent().append(`
-        <select class="appeal-presets appeal-presets-${group}" style="width: 10em; margin-top: 10px;">
-            <option>${group}</option>
-            ${options.join("")}
-        </select>`
-    );
-    $(`.appeal-presets-${group}`).change(function() {
-        const text_to_add = $('option:selected', this).attr('title');
+function add_events_to_group_buttons(group) {
+    $(`.appeal-presets-${group}`).off('click').on('click', function(e) {
+        const text_to_add = this.title;
         if (text_to_add) {
             let curr_text = $('.form-group > textarea#form3-text').val().trimEnd();
             if (curr_text.search(text_to_add) >= 0)
@@ -48,8 +34,15 @@ function create_group(group, options) {
             if (curr_text.length)
                 curr_text += "\n\n";
             $('.form-group > textarea#form3-text').val(curr_text + text_to_add);
+            check_months(curr_text + text_to_add);
         }
     });
+}
+
+function create_group(group, buttons) {
+    $('#appeal-presets').append(`<b style="color: var(--c-primary);">${group}:</b>${buttons.join("")}`);
+    if (buttons.length)
+        add_events_to_group_buttons(group);
 }
 
 function base64ToTxt(base64) {
@@ -175,6 +168,13 @@ $('.appeal__msg__header').css('margin-bottom', "1em");
 $('p:contains("This appeal is now closed")').css('color', "var(--c-bad)").css('border', "2px solid var(--c-bad)");
 $('p:contains("Appeal paused until")').css('color', "var(--c-brilliant)").css('border', "2px solid var(--c-brilliant)");
 
+// All appeals
+$('#pax-appeal-msgs-header').remove();
+$('#pax-table-appeals').remove();
+if ($('.appeal__all').length) {
+    fetch_table_appeals($('.appeal__all').first().attr('href'));
+}
+
 // Add reports
 $('#pax-report-list').remove();
 $('#pax-reports-bar').remove();
@@ -217,35 +217,63 @@ if ($('#inquiry .docs.reports .expendable .report strong').length) {
 if (location.pathname.includes('/appeal/'))
     fetch_user(location.pathname.replace(/\/appeal\/([^/]+).*/, '/@/$1'));
 
-// All appeals
-$('#pax-appeal-msgs-header').remove();
-$('#pax-table-appeals').remove();
-if ($('.appeal__all').length) {
-    fetch_table_appeals($('.appeal__all').first().attr('href'));
+// Appeal messages
+$('#pax-curr-appeal-topic').remove();
+var curr_topic_element = $('<h1 id="pax-curr-appeal-topic" class="box__top"><span class="title"></span></h1>');
+curr_topic_element.css('margin-top', "1em");
+curr_topic_element.insertBefore('.body');
+var cloned_topic = $('.box__top .appeal-topic').first().clone();
+var curr_topic = $('.box__top .appeal-topic').first().text();
+curr_topic_element.find('.title').append(cloned_topic);
+cloned_topic.after('Appeal');
+
+// Pause button
+function check_months(text) {
+    $('#pax-pause').remove();
+    const match = text.match(/(?:in|after)\s+(\d+)\s+month/i);
+    if (match) {
+        const num_months = match[1];
+        if (num_months > 0 && num_months < 120) {
+            const btn_pause = `<button id="pax-pause" name="months" value="${num_months}" type="submit" class="button button-empty" title="Pause for ${num_months} months">Pause ${num_months} months</button>`;
+            $('.appeal__actions form select[name="months"]').parent().prepend(btn_pause);
+        }
+    }
 }
 
-// Appeal messages
-$('#pax-appeal-msgs-header').remove();
-$('<h2 id="pax-appeal-msgs-header">Appeal messages</h2>').insertBefore('.body');
-$(".form-actions a[href='/mod/presets/appeal']").hide();
+var textarea = $('.form-group > textarea#form3-text');
+if (textarea.length > 0) {
+    textarea.on('input', function() {
+        check_months($(this).val());
+    });
+    $('form .appeal-presets').on('click', 'button, input[type="button"], input[type="submit"]', function() {
+        setTimeout(function() {
+            const textareaValue = $('.form-group > textarea#form3-text').val();
+            check_months(textareaValue);
+        }, 50);
+    });
+}
 
 // Presets
 var custom_preset_options = {};
-if (false && $('.form-group > textarea#form3-text').length && !$('.appeal-preset-alt').length) {
-    // Default presets
-    const presets = $('.appeal-presets').attr("id", "appeal-presets");
-    $.each(appeal_presets, function (group, sel) {
-        presets.clone(true, true).removeAttr("id").addClass(`appeal-presets-${group}`).insertBefore("#appeal-presets");
-        $(`.appeal-presets-${group} option:not(:contains("Presets"))`).remove();
-        const s = sel.join('"),option:contains("');
-        const el = $(`#appeal-presets option:contains("${s}")`);
-        def_presets[group] = {};
-        el.each(function(i, data) {
-            def_presets[group][data.text] = data.title;
-        });
-        el.appendTo(`.appeal-presets-${group}`);
-        $(`.appeal-presets-${group} option`).first().text(group);
+
+function add_custom_presets(group, data) {
+    if ($.isEmptyObject(data))
+        return;
+    custom_preset_options[group] = [];
+    let buttons = [];
+    $.each(data, function (name, text) {
+        custom_preset_options[group].push(`<option value="${name}">`);
+        if (!appeal_presets.has(group) || group == curr_topic)
+            buttons.push(`<button class="appeal-presets-${group}" type="button" title="${text}">${name}</button>`);
     });
+    if (buttons.length)
+        create_group(group, buttons);
+    if (!(appeal_presets.has(group)))
+        $('#pax-preset-group-list').append(`<option value="${group}">`);
+}
+
+if (textarea.length && !$('.appeal-preset-custom').length) {
+    const presets = $('.appeal-presets').attr("id", "appeal-presets").css({'max-height': 'none','overflow': 'visible'});
 
     // Custom presets form
     $('.submit').css('margin-top', "10px");
@@ -271,10 +299,14 @@ if (false && $('.form-group > textarea#form3-text').length && !$('.appeal-preset
             </td></tr>
             <tr><td colspan="2">
                 <a id="pax-export-presets" href='data:application/json;charset=utf-8,{}' download="custom_presets.json" class="button button-thin" title="Save all custom preset to a file" style="margin-bottom: 10px; margin-right: 10px;">Export all...</a>
-                Import: <input id="pax-import-presets" type="file" id="file-selector" accept=".json" style="margin-bottom: 10px;"/>
+                Import: <input id="pax-import-presets" type="file" accept=".json" style="margin-bottom: 10px;"/>
             </td></tr>
         </tbody></table>
-    </fieldset>`).insertAfter('#appeal-actions');
+    </fieldset>`).insertAfter('.appeal__actions');
+    for (let group of appeal_presets) {
+        custom_preset_options[group] = [];
+        $('#pax-preset-group-list').append(`<option value="${group}">`);
+    }
     $('#custom-presets legend').click(() => {
         if ($('#custom-presets').is('.toggle-box--toggle-off'))
             $('#custom-presets').removeClass('toggle-box--toggle-off');
@@ -288,6 +320,14 @@ if (false && $('.form-group > textarea#form3-text').length && !$('.appeal-preset
         if (group in custom_preset_options)
             $('#pax-preset-name-list').append(custom_preset_options[group].join(""));
     });
+    $('#pax-new-preset-group').on('click', function() {
+        this.showPicker();
+    });
+    $('#pax-new-preset-name').on('click', function() {
+        this.showPicker();
+    });
+
+    // Import custom presets
     $('#pax-import-presets:file').change(function() {
         const file = $(this).val();
         if (!file)
@@ -345,32 +385,20 @@ if (false && $('.form-group > textarea#form3-text').length && !$('.appeal-preset
         if (!custom_presets)
             return;
         $.each(custom_presets, function (group, data) {
-            if ($.isEmptyObject(data))
-                return;
-            custom_preset_options[group] = [];
-            let options = [];
-            if (group in appeal_presets) {
-                $.each(data, function (name, text) {
-                    custom_preset_options[group].push(`<option value="${name}">`);
-                    options.push(`<option title="${text}" value="${text}">${name}</option>`);
-                });
-                $(`.appeal-presets-${group}`).append(options.join(""));
-                return;
-            }
-            $.each(data, function (name, text) {
-                custom_preset_options[group].push(`<option value="${name}">`);
-                options.push(`<option title="${text}">${name}</option>`);
-            });
-            create_group(group, options);
-            $('#pax-preset-group-list').append(`<option value="${group}">`);
+            if (appeal_presets.has(group.toLowerCase()))
+                add_custom_presets(group.toLowerCase(), data);
         });
-        $('#pax-new-preset-group').trigger("input");
-        update_export(custom_presets);
+        $.each(custom_presets, function (group, data) {
+            if (!appeal_presets.has(group.toLowerCase()))
+                add_custom_presets(group, data);
+        });
     });
 
     // Create a new preset
     $('#pax-save-preset').click(() => {
-        const group = escapeHtml($('#pax-new-preset-group').val().trim());
+        let group = escapeHtml($('#pax-new-preset-group').val().trim());
+        if (appeal_presets.has(group.toLowerCase()))
+            group = group.toLowerCase();
         const name = escapeHtml($('#pax-new-preset-name').val().trim());
         const text = escapeHtml($('#pax-new-preset-text').val().trim());
         if (!group || !name || !text) {
@@ -385,33 +413,27 @@ if (false && $('.form-group > textarea#form3-text').length && !$('.appeal-preset
             alert('A preset group cannot be named "Presets".')
             return;
         }
-        if ((group in def_presets) && (name in def_presets[group])) {
-            alert('To change a default preset, go to the appropriate page.')
-            return;
-        }
         $.when(getData('appeal_presets')).then(function(saved_data) {
             let new_presets = saved_data['appeal_presets'] || {};
             if (!(group in new_presets))
                 new_presets[group] = {};
-            if (!$(`.appeal-presets-${group}`).length) {
-                create_group(group, []);
-            }
             new_presets[group][name] = text;
             browser.storage.local.set({"appeal_presets": new_presets});
-            let existing = $(`.appeal-presets-${group} option`).filter(function() {
-                return $(this).val() === name;
+            let existing = $(`button.appeal-presets-${group}`).filter(function() {
+                return $(this).text() === name;
             });
             if (existing.length) {
-                if (group in appeal_presets)
-                    existing.attr('title', text).attr('value', text);
-                else
-                    existing.attr('title', text);
+                existing.attr('title', text);
             }
             else {
-                if (group in appeal_presets)
-                    $(`.appeal-presets-${group}`).append(`<option title="${text}" value="${text}">${name}</option>`);
-                else
-                    $(`.appeal-presets-${group}`).append(`<option title="${text}">${name}</option>`);
+                if ($(`.appeal-presets-${group}`).length) {
+                    $(`<button class="appeal-presets-${group}" type="button" title="${text}">${name}</button>`).insertAfter(`.appeal-presets-${group}:last`);
+                    add_events_to_group_buttons(group);
+                }
+                else {
+                    const buttons = [`<button class="appeal-presets-${group}" type="button" title="${text}">${name}</button>`];
+                    create_group(group, buttons);
+                }
             }
             $('#pax-new-preset-name').val("");
             $('#pax-new-preset-text').val("");
@@ -435,10 +457,6 @@ if (false && $('.form-group > textarea#form3-text').length && !$('.appeal-preset
             alert('A preset group cannot be named "Presets".')
             return;
         }
-        if ((group in def_presets) && (name in def_presets[group])) {
-            alert('To delete a default preset, go to the appropriate page.')
-            return;
-        }
         $.when(getData('appeal_presets')).then(function(saved_data) {
             let curr_presets = saved_data['appeal_presets'];
             if (!curr_presets)
@@ -453,11 +471,9 @@ if (false && $('.form-group > textarea#form3-text').length && !$('.appeal-preset
             }
             delete curr_presets[group][name];
             browser.storage.local.set({"appeal_presets": curr_presets});
-            $(`.appeal-presets-${group} option`).filter(function() {
+            $(`button.appeal-presets-${group}`).filter(function() {
                 return $(this).text() === $('#pax-new-preset-name').val();
             }).remove();
-            if (!(group in def_presets) && $(`.appeal-presets-${group} option`).length == 1)
-                $(`.appeal-presets-${group}`).remove();
             $('#pax-new-preset-name').val("");
             update_export(curr_presets);
         });
