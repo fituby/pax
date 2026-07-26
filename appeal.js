@@ -229,13 +229,17 @@ cloned_topic.after('Appeal');
 
 // Pause button
 function check_months(text) {
+    return; // disable as it only works with values from the list
     $('#pax-pause').remove();
     const match = text.match(/(?:in|after)\s+(\d+)\s+month/i);
     if (match) {
         const num_months = match[1];
         if (num_months > 0 && num_months < 120) {
-            const btn_pause = `<button id="pax-pause" name="months" value="${num_months}" type="submit" class="button button-empty" title="Pause for ${num_months} months">Pause ${num_months} months</button>`;
-            $('.appeal__actions form select[name="months"]').parent().prepend(btn_pause);
+            var old_form = $('.appeal__actions form select[name="months"]').closest('form');
+            var new_form = old_form.clone().empty().attr("id", "pax-pause");
+            const btn_pause = `<button name="months" value="${num_months}" type="submit" class="button button-empty" title="Pause for ${num_months} months">Pause ${num_months} months</button>`;
+            new_form.append(btn_pause);
+            new_form.insertBefore(old_form);
         }
     }
 }
