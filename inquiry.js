@@ -14,12 +14,14 @@ $('#inquiry .docs.reports .expendable .doc.report .atom').css('max-width', "70vw
 
 for (const section of ['engine', 'booster', 'shadowban', 'alt']) {
     $(`#inquiry .actions .dropper.${section} .separator`).hide();
-    $(`#inquiry .actions .dropper.${section} form > button.fbt`).filter(function(i){
-        return $(this).text().includes("And stay on this report");}
-    ).parent().hide();
-    $(`#inquiry .actions .dropper.${section} form > button.fbt`).filter(function(i){
-        return $(this).text().includes("Then open profile");}
-    ).parent().hide();
+    $('#auto-next').on('change', function() {
+        $(`#inquiry .actions .dropper.${section} form > button.fbt`).filter(function (i) {
+            return $(this).text().includes("And stay on this report");
+        }).parent().toggle(this.checked);
+    }).trigger('change');
+    $(`#inquiry .actions .dropper.${section} form > button.fbt`).filter(function(i) {
+        return $(this).text().includes("Then open profile");
+    }).parent().hide();
 }
 
 const observer_counter = new ResizeObserver(entries => {

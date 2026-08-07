@@ -396,6 +396,7 @@ if (textarea.length && !$('.appeal-preset-custom').length) {
             if (!appeal_presets.has(group.toLowerCase()))
                 add_custom_presets(group, data);
         });
+        update_export(custom_presets); // update export list
     });
 
     // Create a new preset
