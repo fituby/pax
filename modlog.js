@@ -196,7 +196,7 @@ var modlog_btns = {
     'pax-perms':     {name: "Permissions",
                       sel: '.mod-timeline__event--modlog .mod-timeline__event__action--permissions'},
     'pax-actions':   {name: "Actions",
-                      sel: '.mod-timeline__event__action--sentence:not(.mod-timeline__event__action--chatTimeout):not(.mod-timeline__event__action--deletePost), .mod-timeline__event__action--undo, .mod-timeline__event__action--setKidMode, .mod-timeline__event__action--unsetKidMode'},
+                      sel: '.mod-timeline__event__action--sentence:not(.mod-timeline__event__action--chatTimeout):not(.mod-timeline__event__action--deletePost), .mod-timeline__event__action--undo, .mod-timeline__event__action--unArenaBan, .mod-timeline__event__action--setKidMode, .mod-timeline__event__action--unsetKidMode'},
     'pax-warnings':  {name: "Warnings",
                       sel: '.mod-timeline__event--modlog .mod-timeline__text:contains("Warning: ")'},
     'pax-forumposts':{name: "Forum posts",

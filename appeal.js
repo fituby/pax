@@ -66,9 +66,13 @@ function update_export(custom_presets) {
 async function fetch_user(url) {
     const response = await fetch(url);
     const data = await response.text();
-    const note_zone = $(data).find('.note-zone');
+    let note_zone = $(data).find('.note-zone');
     if (note_zone.length == 1 && note_zone.find('.note').length) {
-        note_zone.addClass('pax-note-zone').attr('id', "pax-note-list").insertAfter('.mod-zone-full');
+        note_zone.addClass('pax-note-zone').attr('id', "pax-note-list");
+        if ($('#pax-table-appeals').length > 0)
+            note_zone.insertAfter('#pax-table-appeals');
+        else
+            note_zone.insertBefore('.mod-zone-full');
         $('.note').not('#inquiry .note').addClass('pax-note');
         add_note_buttons(true);
         $('.note-zone form').hide();
@@ -80,10 +84,10 @@ async function fetch_table_appeals(url) {
         return;
     const response = await fetch(url);
     const data = await response.text();
-    const table_appeals = $(data).find('.appeal-list');
+    let table_appeals = $(data).find('.appeal-list');
     if (table_appeals.length == 1) {
-        table_appeals.attr('id', "pax-table-appeals").insertAfter('.mod-zone-full');
-        $('<h2 id="pax-appeal-msgs-header">All appeals</h2>').insertAfter('.mod-zone-full');
+        $('<h2 id="pax-appeal-msgs-header">All appeals</h2>').insertBefore('.mod-zone-full');
+        table_appeals.attr('id', "pax-table-appeals").insertAfter('#pax-appeal-msgs-header');
     }
 }
 
@@ -167,6 +171,9 @@ $('.appeal__msg').css('padding', "1em 1em").css('margin-bottom', "1em");
 $('.appeal__msg__header').css('margin-bottom', "1em");
 $('p:contains("This appeal is now closed")').css('color', "var(--c-bad)").css('border', "2px solid var(--c-bad)");
 $('p:contains("Appeal paused until")').css('color', "var(--c-brilliant)").css('border', "2px solid var(--c-brilliant)");
+$("h3:contains('Declared accounts')").replaceWith(function() {
+    return $("<h2>").append($(this).contents());
+});
 
 // All appeals
 $('#pax-appeal-msgs-header').remove();
@@ -179,7 +186,7 @@ if ($('.appeal__all').length) {
 $('#pax-report-list').remove();
 $('#pax-reports-bar').remove();
 if ($('#inquiry .docs.reports .expendable .report strong').length) {
-    $('#inquiry .docs.reports .expendable').first().clone().attr('id', "pax-report-list").insertAfter('.mod-zone-full');
+    $('#inquiry .docs.reports .expendable').first().clone().attr('id', "pax-report-list").insertBefore('.mod-zone-full');
     $('#pax-report-list .report').first().remove();
     $('#pax-report-list').css('margin-bottom', "2em").css('padding-bottom', "1em");
     let reports = {};
