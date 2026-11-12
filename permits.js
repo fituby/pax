@@ -1,3 +1,5 @@
+(() => { // own scope, so names here cannot clash with other content scripts
+
 const permits = {
     'Admin':    {regex: /\b(Super Admin|Admin|Lila settings|Command line|Process title requests)\b/g,
                  color: "var(--c-interesting)"},
@@ -34,7 +36,7 @@ function permits_btn_clicked(btn_id) {
         btn.removeClass('pax-inactive').addClass('pax-active');
 
     $('#mod_table .slist td a:not(.user-link)').each(function(i, o) {
-        let other = $(this).text().replaceAll(/<span [^<>]+>([^<>]+)<\/span>/g, "$1");
+        let other = $(this).text();
         let is_text = false;
         $.each(permits, function (name, d) {
             if ($(`#pax-permits-${name}`).is('.pax-inactive'))
@@ -117,3 +119,5 @@ $.each(permits, function (name, d) {
 });
 $('#pax-permits-other').click(() => { permits_btn_clicked('pax-permits-other'); });
 $('#pax-permits-total').click(permits_total_clicked);
+
+})();

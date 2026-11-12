@@ -1,3 +1,7 @@
+// Everything is wrapped in a function so that names declared here can't clash
+// with other content scripts loaded on the same page (they share one global scope).
+(() => {
+
 const appeal_presets = new Set(["cheat", "boost", "close", "comm", "rank", "arena", "prize", "blog", "streamer", "warning", "legacy", "chat"]);
 
 var entityMap = {
@@ -29,12 +33,11 @@ function add_events_to_group_buttons(group) {
         const text_to_add = this.title;
         if (text_to_add) {
             let curr_text = $('.form-group > textarea#form3-text').val().trimEnd();
-            if (curr_text.search(text_to_add) >= 0)
+            if (curr_text.includes(text_to_add))
                 return;
             if (curr_text.length)
                 curr_text += "\n\n";
             $('.form-group > textarea#form3-text').val(curr_text + text_to_add);
-            check_months(curr_text + text_to_add);
         }
     });
 }
@@ -43,12 +46,6 @@ function create_group(group, buttons) {
     $('#appeal-presets').append(`<b style="color: var(--c-primary);">${group}:</b>${buttons.join("")}`);
     if (buttons.length)
         add_events_to_group_buttons(group);
-}
-
-function base64ToTxt(base64) {
-    const binString = atob(base64);
-    const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0));
-    return new TextDecoder().decode(bytes);
 }
 
 function txtToBase64(txt) {
@@ -63,10 +60,19 @@ function update_export(custom_presets) {
     $('#pax-export-presets').attr('href', `data:application/json;base64,${txtToBase64(JSON.stringify(custom_presets))}`);
 }
 
-async function fetch_user(url) {
+// Loads a page and parses it into a separate, inert document:
+// unlike $(html), this doesn't start downloading its images or other resources.
+async function fetch_page(url) {
     const response = await fetch(url);
-    const data = await response.text();
-    let note_zone = $(data).find('.note-zone');
+    if (!response.ok)
+        throw new Error(`Failed to load ${url}: ${response.status}`);
+    const html = await response.text();
+    return $(new DOMParser().parseFromString(html, 'text/html'));
+}
+
+async function fetch_user(url) {
+    const page = await fetch_page(url);
+    let note_zone = page.find('.note-zone');
     if (note_zone.length == 1 && note_zone.find('.note').length) {
         note_zone.addClass('pax-note-zone').attr('id', "pax-note-list");
         if ($('#pax-table-appeals').length > 0)
@@ -82,9 +88,8 @@ async function fetch_user(url) {
 async function fetch_table_appeals(url) {
     if (!url.length)
         return;
-    const response = await fetch(url);
-    const data = await response.text();
-    let table_appeals = $(data).find('.appeal-list');
+    const page = await fetch_page(url);
+    let table_appeals = page.find('.appeal-list');
     if (table_appeals.length == 1) {
         $('<h2 id="pax-appeal-msgs-header">All appeals</h2>').insertBefore('.mod-zone-full');
         table_appeals.attr('id', "pax-table-appeals").insertAfter('#pax-appeal-msgs-header');
@@ -179,7 +184,8 @@ $("h3:contains('Declared accounts')").replaceWith(function() {
 $('#pax-appeal-msgs-header').remove();
 $('#pax-table-appeals').remove();
 if ($('.appeal__all').length) {
-    fetch_table_appeals($('.appeal__all').first().attr('href'));
+    fetch_table_appeals($('.appeal__all').first().attr('href'))
+        .catch(e => console.error("Pax:", e));
 }
 
 // Add reports
@@ -222,7 +228,8 @@ if ($('#inquiry .docs.reports .expendable .report strong').length) {
 
 // Add notes
 if (location.pathname.includes('/appeal/'))
-    fetch_user(location.pathname.replace(/\/appeal\/([^/]+).*/, '/@/$1'));
+    fetch_user(location.pathname.replace(/\/appeal\/([^/]+).*/, '/@/$1'))
+        .catch(e => console.error("Pax:", e));
 
 // Appeal messages
 $('#pax-curr-appeal-topic').remove();
@@ -234,35 +241,7 @@ var curr_topic = $('.box__top .appeal-topic').first().text();
 curr_topic_element.find('.title').append(cloned_topic);
 cloned_topic.after('Appeal');
 
-// Pause button
-function check_months(text) {
-    return; // disable as it only works with values from the list
-    $('#pax-pause').remove();
-    const match = text.match(/(?:in|after)\s+(\d+)\s+month/i);
-    if (match) {
-        const num_months = match[1];
-        if (num_months > 0 && num_months < 120) {
-            var old_form = $('.appeal__actions form select[name="months"]').closest('form');
-            var new_form = old_form.clone().empty().attr("id", "pax-pause");
-            const btn_pause = `<button name="months" value="${num_months}" type="submit" class="button button-empty" title="Pause for ${num_months} months">Pause ${num_months} months</button>`;
-            new_form.append(btn_pause);
-            new_form.insertBefore(old_form);
-        }
-    }
-}
-
 var textarea = $('.form-group > textarea#form3-text');
-if (textarea.length > 0) {
-    textarea.on('input', function() {
-        check_months($(this).val());
-    });
-    $('form .appeal-presets').on('click', 'button, input[type="button"], input[type="submit"]', function() {
-        setTimeout(function() {
-            const textareaValue = $('.form-group > textarea#form3-text').val();
-            check_months(textareaValue);
-        }, 50);
-    });
-}
 
 // Presets
 var custom_preset_options = {};
@@ -340,10 +319,10 @@ if (textarea.length && !$('.appeal-preset-custom').length) {
 
     // Import custom presets
     $('#pax-import-presets:file').change(function() {
-        const file = $(this).val();
-        if (!file)
+        const input = this;
+        if (!input.value)
             return;
-        const files = $(this).get(0).files;
+        const files = input.files;
         if (!files.length) {
             alert("Failed to read the file.")
             return;
@@ -353,9 +332,17 @@ if (textarea.length && !$('.appeal-preset-custom').length) {
             const file_presets = files[0];
             var reader = new FileReader();
             reader.onload = function (e) {
-                const decoded = base64ToTxt(e.target.result.split(',')[1]);
-                const loaded_presets = JSON.parse(decoded);
-                if ($.isEmptyObject(loaded_presets)) {
+                // Clear the input so that choosing the same file again triggers "change"
+                input.value = "";
+                let loaded_presets;
+                try {
+                    loaded_presets = JSON.parse(e.target.result);
+                }
+                catch (err) {
+                    alert(`Failed to decode the file: ${err.message}`);
+                    return;
+                }
+                if (!$.isPlainObject(loaded_presets) || $.isEmptyObject(loaded_presets)) {
                     alert("Failed to decode the file.")
                     return;
                 }
@@ -386,7 +373,11 @@ if (textarea.length && !$('.appeal-preset-custom').length) {
                     location.reload();
                 });
             };
-            reader.readAsDataURL(file_presets);
+            reader.onerror = function () {
+                input.value = "";
+                alert("Failed to read the file.");
+            };
+            reader.readAsText(file_presets);
         });
     });
 
@@ -491,3 +482,5 @@ if (textarea.length && !$('.appeal-preset-custom').length) {
         });
     });
 }
+
+})();

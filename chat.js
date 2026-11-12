@@ -1,5 +1,7 @@
+(() => { // own scope, so names here cannot clash with other content scripts
+
 function reload_chat_msgs() {
-    prev_val = $('#pax-user-selector option:selected').text();
+    let prev_val = $('#pax-user-selector option:selected').text();
     if (prev_val && !prev_val.startsWith("All players"))
         prev_val = prev_val.split(" ")[2];
     $('#pax-user-selector').remove();
@@ -64,3 +66,5 @@ const chat_callback = (mutationList, observer) => {
 };
 const chat_observer = new MutationObserver(chat_callback);
 chat_observer.observe(document, config_chat);
+
+})();

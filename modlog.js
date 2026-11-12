@@ -104,7 +104,7 @@ const timeline_actions = [
 const recent_event = '.mod-timeline__event--recent';
 
 function get_age(obj) {
-    age = obj.is(recent_event) || obj.closest('.mod-timeline__event').is(recent_event) ? "new" : "old";
+    const age = obj.is(recent_event) || obj.closest('.mod-timeline__event').is(recent_event) ? "new" : "old";
     if (!(age in modlog_items))
         modlog_items[age] = {};
     return age;
@@ -143,7 +143,7 @@ function add_modlog_info() {
     });
 
     $('.mod-timeline__event--playban > .mod-timeline__event__body:contains("Playban")').each(function(i, o) {
-        const num = parseInt($(this).text().split(" "));
+        const num = parseInt($(this).text().trim());
         if (!num || num < 0 || num > 999)
             return;
         const age = get_age($(this));
@@ -168,11 +168,11 @@ function add_modlog_info() {
     });
 
     let items = [];
-    for (const age of ['new', '?age', 'old']) {
+    for (const age of ['new', 'old']) {
         if (age in modlog_items)
             items.push(add_timeline_info(age, modlog_items[age]));
     }
-    const text = `<div id="pax-modlog-info" style="display: flex; align-items: top;">
+    const text = `<div id="pax-modlog-info" style="display: flex; align-items: flex-start;">
                      ${items.join("")}
                  </div>`;
     $(text).insertBefore('.mod-timeline');
@@ -299,12 +299,12 @@ function add_modlog_actions() {
     $('.pm-preset:not(.pm-preset-warn) option:contains("Warning")').appendTo('.pm-preset-warn select');
 
     // Name+Close
-    const close_name = `<button id="pax-name-close" class="btn-rack__btn" style="border: 0; margin: 1px;" title='Alt+Close this account + add note \"name\"' data-icon="">Name</button>`;
+    const close_name = `<button id="pax-name-close" class="btn-rack__btn" style="border: 0; margin: 1px;" title='Close this account + add note \"name\"' data-icon="">Name</button>`;
     const add_action_btns = `<div id="pax-add-actions" class="btn-rack">${close_name}</div>`;
     $(add_action_btns).insertBefore('.pm-preset:not(.pm-preset-warn)');
     const btn_alt = $('.btn-rack__btn:not(#pax-name-close):not(.active):contains("Alt")');
     const btn_close = $('.btn-rack__btn:not(#pax-name-close):not(.active):contains("Close")');
-    if (btn_alt.length != 1 || btn_close.length != 1) {
+    if (btn_close.length != 1) {
         disable_name_close();
     }
     else {
@@ -315,18 +315,22 @@ function add_modlog_actions() {
             const note_action = $('.note-form').attr('action');
             if (!note_action)
                 return;
-            const btn_alt = $('.btn-rack__btn:not(#pax-name-close):not(.active):contains("Alt")');
             const btn_close = $('.btn-rack__btn:not(#pax-name-close):not(.active):contains("Close")');
-            if (btn_alt.length != 1 || btn_close.length != 1)
+            if (btn_close.length != 1)
                 return;
-            const alt_action = btn_alt.parent().attr('action');
-            if (!alt_action)
+            const close_action = btn_close.parent().attr('action');
+            if (!close_action)
                 return;
-            $.post(alt_action, function() {
+            $.post(close_action).done(function() {
                 disable_name_close();
-                $.post(note_action, data = {text: "name", noteType: "mod"}, function() {
+                $.post(note_action, {text: "name", noteType: "mod"}).done(function() {
+                    location.reload();
+                }).fail(function(xhr) {
+                    alert(`The account was closed, but adding the note "name" failed (${xhr.status} ${xhr.statusText}).`);
                     location.reload();
                 });
+            }).fail(function(xhr) {
+                alert(`Closing the account failed (${xhr.status} ${xhr.statusText}). No note was added.`);
             });
         });
         btn_alt.on("click keyup", disable_name_close);
@@ -341,8 +345,11 @@ function clear_pax_hover() {
         $('#mz_others tr').removeClass('none');
 }
 
+// The functions below can run several times on the same page. Each binding uses its own
+// event namespace (".pax...") and removes the previous one first, so handlers aren't duplicated.
 function add_hover(source, dest) {
-    $(`${source} tbody tr`).on("mouseover", function() {
+    const ns = '.pax' + source.replace(/\W/g, '');
+    $(`${source} tbody tr`).off(ns).on('mouseover' + ns, function() {
         if ($('#mz_identification tbody tr.selected').length)
             return;
         clear_pax_hover();
@@ -353,13 +360,12 @@ function add_hover(source, dest) {
         $(`${dest} tbody td[data-sort="${timestamp}"] time`).closest('tr').each(function(i, o) {
             $(o).addClass('pax-hover');
         });
-    });
-    $(`${source} tbody tr`).on("mouseleave", clear_pax_hover);
+    }).on('mouseleave' + ns, clear_pax_hover).on('click' + ns, clear_pax_hover);
 }
 
 function update_others() {
     // Usertable
-    $('#mz_others tbody tr').on("mouseover", function() {
+    $('#mz_others tbody tr').off('.paxOthers').on('mouseover.paxOthers', function() {
         if ($('#mz_identification tbody tr.selected').length)
             return;
         clear_pax_hover();
@@ -378,13 +384,12 @@ function update_others() {
                     $(`.spy_uas tbody td[data-sort="${timestamp}"] time`).closest('tr').addClass('pax-hover');
             }
         });
-    });
-    $('#mz_others tbody tr').on("mouseleave", clear_pax_hover);
+    }).on('mouseleave.paxOthers', clear_pax_hover);
 }
 
 function update_identification() {
     // Devices
-    $('.spy_uas tbody tr').on("mouseover", function() {
+    $('.spy_uas tbody tr').off('.paxUas').on('mouseover.paxUas', function() {
         if ($('#mz_identification tbody tr.selected').length)
             return;
         clear_pax_hover();
@@ -401,16 +406,12 @@ function update_identification() {
                 return !($(this).data('tags') || "").includes(tag);
             }).addClass('none');
         });
-    });
-    $('.spy_uas tbody tr').on("mouseleave", clear_pax_hover);
+    }).on('mouseleave.paxUas', clear_pax_hover);
 
-    // All tables
+    // All tables (add_hover also clears the highlight on click)
     add_hover('.spy_locs', '#identification_screen');
     add_hover('#identification_screen', '.spy_locs');
     add_hover('.spy_fps', '.spy_uas');
-    $('.spy_locs tbody tr').on('click', clear_pax_hover);
-    $('#identification_screen tbody tr').on('click', clear_pax_hover);
-    $('.spy_fps tbody tr').on('click', clear_pax_hover);
 }
 
 function move_modzone_elements() {

@@ -1,3 +1,5 @@
+(() => { // own scope, so names here cannot clash with other content scripts
+
 function remove_highlights() {
     if (CSS.highlights) {
         setTimeout(() => {
@@ -15,3 +17,5 @@ const chat_callback = (mutationList, observer) => {
 };
 const chat_observer = new MutationObserver(chat_callback);
 chat_observer.observe(document, config_comms);
+
+})();

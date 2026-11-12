@@ -1,3 +1,5 @@
+(() => { // own scope, so names here cannot clash with other content scripts
+
 // Note buttons
 $('.note-zone form.note-form .mod-note button[value="dox"]').css('background', "var(--c-accent)");
 $('.note-zone form.note-form .mod-note button[value="normal"]').css('background', "var(--c-font-dim)");
@@ -42,3 +44,5 @@ $('.mod-zone').each(function(i, o) {
         setTimeout(() => { init_modlog(); }, 2000);
     }
 });
+
+})();

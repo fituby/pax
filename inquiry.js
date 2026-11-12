@@ -1,3 +1,5 @@
+(() => { // own scope, so names here cannot clash with other content scripts
+
 $('#inquiry .dropper > div').css('max-height', "85vh");
 $('#inquiry .dropper.counter').css('justify-content', "center").css("display", "flex");
 $('#inquiry .dropper.counter > div').css('width', "fit-content").css("min-width", "40vw").css("max-width", "85vw").css('right', "unset");
@@ -12,17 +14,20 @@ $('#inquiry .dropper > div').css('overflow', "auto");
 $('#inquiry .docs.reports .expendable').css('width', "fit-content").css('max-height', "85vh");
 $('#inquiry .docs.reports .expendable .doc.report .atom').css('max-width', "70vw");
 
-for (const section of ['engine', 'booster', 'shadowban', 'alt']) {
+const action_sections = ['engine', 'booster', 'shadowban', 'alt'];
+for (const section of action_sections) {
     $(`#inquiry .actions .dropper.${section} .separator`).hide();
-    $('#auto-next').on('change', function() {
-        $(`#inquiry .actions .dropper.${section} form > button.fbt`).filter(function (i) {
-            return $(this).text().includes("And stay on this report");
-        }).parent().toggle(this.checked);
-    }).trigger('change');
     $(`#inquiry .actions .dropper.${section} form > button.fbt`).filter(function(i) {
         return $(this).text().includes("Then open profile");
     }).parent().hide();
 }
+$('#auto-next').on('change', function() {
+    for (const section of action_sections) {
+        $(`#inquiry .actions .dropper.${section} form > button.fbt`).filter(function (i) {
+            return $(this).text().includes("And stay on this report");
+        }).parent().toggle(this.checked);
+    }
+}).trigger('change');
 
 const observer_counter = new ResizeObserver(entries => {
     for (const entry of entries){
@@ -36,3 +41,5 @@ const observer_counter = new ResizeObserver(entries => {
 $('#inquiry .dropper.counter > div').each(function(i, o) {
     observer_counter.observe(o);
 });
+
+})();

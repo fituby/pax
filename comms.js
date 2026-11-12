@@ -1,3 +1,5 @@
+(() => { // own scope, so names here cannot clash with other content scripts
+
 const team_msg = "You received this because you are subscribed to messages of the team https://lichess.org/team/";
 
 const num_team_msgs_author = $(`.post.author:contains(${team_msg})`).length;
@@ -93,3 +95,5 @@ if (!$('#pax-modlog-info').length) {
     add_modlog_info();
     add_modlog_buttons();
 }
+
+})();
