@@ -20,32 +20,66 @@ function escapeHtml (string) {
     });
 }
 
-function getData(obj) {
-    var deferred = $.Deferred();
-    browser.storage.local.get(obj, function(result) {
-       deferred.resolve(result);
+// Custom presets are stored (and exported) with group names, preset names and texts
+// HTML-escaped by escapeHtml(). That format is kept so that files exported by any version
+// of Pax keep working everywhere. This turns stored values back into plain text for display.
+const entityNames = {amp: '&', lt: '<', gt: '>', quot: '"', apos: "'"};
+function unescapeHtml(string) {
+    return String(string).replace(/&(?:#(\d+)|#x([0-9a-f]+)|(amp|lt|gt|quot|apos));/gi, function (s, dec, hex, name) {
+        if (name)
+            return entityNames[name.toLowerCase()];
+        const code = dec ? parseInt(dec, 10) : parseInt(hex, 16);
+        return code <= 0x10FFFF ? String.fromCodePoint(code) : s;
     });
-    return deferred.promise();
 }
 
-function add_events_to_group_buttons(group) {
-    $(`.appeal-presets-${group}`).off('click').on('click', function(e) {
-        const text_to_add = this.title;
-        if (text_to_add) {
-            let curr_text = $('.form-group > textarea#form3-text').val().trimEnd();
-            if (curr_text.includes(text_to_add))
-                return;
-            if (curr_text.length)
-                curr_text += "\n\n";
-            $('.form-group > textarea#form3-text').val(curr_text + text_to_add);
-        }
+// Firefox provides the "browser" API, Chrome only "chrome". Both return promises.
+const ext = globalThis.browser ?? globalThis.chrome;
+
+function getData(key) {
+    return ext.storage.local.get(key);
+}
+
+// Preset buttons and group headers remember their group and name exactly as stored (escaped),
+// so they can be compared with the stored presets directly.
+// The text is set with .text()/.attr(), so it is never interpreted as HTML.
+function make_preset_button(group, name, text) {
+    return $('<button type="button" class="pax-preset">')
+        .attr('title', unescapeHtml(text))
+        .text(unescapeHtml(name))
+        .data({group: group, name: name});
+}
+
+function group_buttons(group) {
+    return $('#appeal-presets button.pax-preset').filter(function() {
+        return $(this).data('group') === group;
+    });
+}
+
+function group_header(group) {
+    return $('#appeal-presets .pax-preset-group').filter(function() {
+        return $(this).data('group') === group;
     });
 }
 
 function create_group(group, buttons) {
-    $('#appeal-presets').append(`<b style="color: var(--c-primary);">${group}:</b>${buttons.join("")}`);
-    if (buttons.length)
-        add_events_to_group_buttons(group);
+    const header = $('<b class="pax-preset-group">')
+        .css('color', "var(--c-primary)")
+        .text(`${unescapeHtml(group)}:`)
+        .data('group', group);
+    $('#appeal-presets').append(header, buttons);
+}
+
+function preset_clicked() {
+    const text_to_add = this.title;
+    if (text_to_add) {
+        let curr_text = $('.form-group > textarea#form3-text').val().trimEnd();
+        if (curr_text.includes(text_to_add))
+            return;
+        if (curr_text.length)
+            curr_text += "\n\n";
+        $('.form-group > textarea#form3-text').val(curr_text + text_to_add);
+    }
 }
 
 function txtToBase64(txt) {
@@ -252,18 +286,19 @@ function add_custom_presets(group, data) {
     custom_preset_options[group] = [];
     let buttons = [];
     $.each(data, function (name, text) {
-        custom_preset_options[group].push(`<option value="${name}">`);
+        custom_preset_options[group].push(unescapeHtml(name));
         if (!appeal_presets.has(group) || group == curr_topic)
-            buttons.push(`<button class="appeal-presets-${group}" type="button" title="${text}">${name}</button>`);
+            buttons.push(make_preset_button(group, name, text));
     });
     if (buttons.length)
         create_group(group, buttons);
     if (!(appeal_presets.has(group)))
-        $('#pax-preset-group-list').append(`<option value="${group}">`);
+        $('#pax-preset-group-list').append($('<option>').val(unescapeHtml(group)));
 }
 
 if (textarea.length && !$('.appeal-preset-custom').length) {
     const presets = $('.appeal-presets').attr("id", "appeal-presets").css({'max-height': 'none','overflow': 'visible'});
+    presets.on('click', 'button.pax-preset', preset_clicked);
 
     // Custom presets form
     $('.submit').css('margin-top', "10px");
@@ -308,7 +343,7 @@ if (textarea.length && !$('.appeal-preset-custom').length) {
         $(this).val(group);
         $('#pax-preset-name-list').empty();
         if (group in custom_preset_options)
-            $('#pax-preset-name-list').append(custom_preset_options[group].join(""));
+            $('#pax-preset-name-list').append(custom_preset_options[group].map(name => $('<option>').val(name)));
     });
     $('#pax-new-preset-group').on('click', function() {
         this.showPicker();
@@ -327,7 +362,7 @@ if (textarea.length && !$('.appeal-preset-custom').length) {
             alert("Failed to read the file.")
             return;
         }
-        $.when(getData('appeal_presets')).then(function(saved_data) {
+        getData('appeal_presets').then(function(saved_data) {
             const custom_presets = saved_data['appeal_presets'];
             const file_presets = files[0];
             var reader = new FileReader();
@@ -342,8 +377,12 @@ if (textarea.length && !$('.appeal-preset-custom').length) {
                     alert(`Failed to decode the file: ${err.message}`);
                     return;
                 }
-                if (!$.isPlainObject(loaded_presets) || $.isEmptyObject(loaded_presets)) {
-                    alert("Failed to decode the file.")
+                // Expected format: {"group": {"preset name": "preset text", ...}, ...}
+                const is_valid = $.isPlainObject(loaded_presets) && !$.isEmptyObject(loaded_presets) &&
+                    Object.values(loaded_presets).every(data => $.isPlainObject(data) &&
+                        Object.values(data).every(text => typeof text === 'string'));
+                if (!is_valid) {
+                    alert("Failed to decode the file: it doesn't contain custom presets.")
                     return;
                 }
                 if (!jQuery.isEmptyObject(custom_presets)) {
@@ -369,7 +408,7 @@ if (textarea.length && !$('.appeal-preset-custom').length) {
                             return;
                     }
                 }
-                browser.storage.local.set({"appeal_presets": loaded_presets}).then(function() {
+                ext.storage.local.set({"appeal_presets": loaded_presets}).then(function() {
                     location.reload();
                 });
             };
@@ -382,7 +421,7 @@ if (textarea.length && !$('.appeal-preset-custom').length) {
     });
 
     // Custom presets
-    $.when(getData('appeal_presets')).then(function(saved_data) {
+    getData('appeal_presets').then(function(saved_data) {
         const custom_presets = saved_data['appeal_presets'];
         if (!custom_presets)
             return;
@@ -416,28 +455,26 @@ if (textarea.length && !$('.appeal-preset-custom').length) {
             alert('A preset group cannot be named "Presets".')
             return;
         }
-        $.when(getData('appeal_presets')).then(function(saved_data) {
+        getData('appeal_presets').then(function(saved_data) {
             let new_presets = saved_data['appeal_presets'] || {};
             if (!(group in new_presets))
                 new_presets[group] = {};
             new_presets[group][name] = text;
-            browser.storage.local.set({"appeal_presets": new_presets});
-            let existing = $(`button.appeal-presets-${group}`).filter(function() {
-                return $(this).text() === name;
+            ext.storage.local.set({"appeal_presets": new_presets});
+            const buttons = group_buttons(group);
+            const existing = buttons.filter(function() {
+                return $(this).data('name') === name;
             });
-            if (existing.length) {
-                existing.attr('title', text);
-            }
-            else {
-                if ($(`.appeal-presets-${group}`).length) {
-                    $(`<button class="appeal-presets-${group}" type="button" title="${text}">${name}</button>`).insertAfter(`.appeal-presets-${group}:last`);
-                    add_events_to_group_buttons(group);
-                }
-                else {
-                    const buttons = [`<button class="appeal-presets-${group}" type="button" title="${text}">${name}</button>`];
-                    create_group(group, buttons);
-                }
-            }
+            if (existing.length)
+                existing.attr('title', unescapeHtml(text));
+            else if (buttons.length)
+                make_preset_button(group, name, text).insertAfter(buttons.last());
+            else
+                create_group(group, [make_preset_button(group, name, text)]);
+            if (!(group in custom_preset_options))
+                custom_preset_options[group] = [];
+            if (!custom_preset_options[group].includes(unescapeHtml(name)))
+                custom_preset_options[group].push(unescapeHtml(name));
             $('#pax-new-preset-name').val("");
             $('#pax-new-preset-text').val("");
             update_export(new_presets);
@@ -460,7 +497,7 @@ if (textarea.length && !$('.appeal-preset-custom').length) {
             alert('A preset group cannot be named "Presets".')
             return;
         }
-        $.when(getData('appeal_presets')).then(function(saved_data) {
+        getData('appeal_presets').then(function(saved_data) {
             let curr_presets = saved_data['appeal_presets'];
             if (!curr_presets)
                 return;
@@ -469,14 +506,20 @@ if (textarea.length && !$('.appeal-preset-custom').length) {
                 return;
             }
             if (!(name in curr_presets[group])) {
-                alert(`In the group "${group}", there's no preset named "${name}"`);
+                alert(`In the group "${group}", there's no preset named "${unescapeHtml(name)}"`);
                 return;
             }
             delete curr_presets[group][name];
-            browser.storage.local.set({"appeal_presets": curr_presets});
-            $(`button.appeal-presets-${group}`).filter(function() {
-                return $(this).text() === $('#pax-new-preset-name').val();
+            if ($.isEmptyObject(curr_presets[group]))
+                delete curr_presets[group];
+            ext.storage.local.set({"appeal_presets": curr_presets});
+            group_buttons(group).filter(function() {
+                return $(this).data('name') === name;
             }).remove();
+            if (!group_buttons(group).length)
+                group_header(group).remove();
+            if (group in custom_preset_options)
+                custom_preset_options[group] = custom_preset_options[group].filter(n => n !== unescapeHtml(name));
             $('#pax-new-preset-name').val("");
             update_export(curr_presets);
         });
