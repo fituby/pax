@@ -1,7 +1,7 @@
 ﻿{
 	"manifest_version": 3,
 	"name": "Pax",
-	"version": "1.2.2",
+	"version": "1.2.3",
 	"description": "Brings harmony to Lichess like Pax, the Roman goddess of peace: tools for users with extra permissions and a better chat for all.",
 	"icons": {
 		"16": "icons/pax-16.png",

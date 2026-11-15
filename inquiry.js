@@ -21,13 +21,24 @@ for (const section of action_sections) {
         return $(this).text().includes("Then open profile");
     }).parent().hide();
 }
-$('#auto-next').on('change', function() {
+// Show "And stay on this report" only while "Automatically open next report" is checked.
+// Lichess renders that checkbox as checked and then restores the user's saved setting with its
+// own script, which may run after this one and doesn't fire a "change" event. So besides
+// "change", the buttons are also updated whenever one of the action menus is opened.
+function update_stay_buttons() {
+    const auto_next = $('#auto-next');
+    if (!auto_next.length)
+        return;
+    const checked = auto_next.prop('checked');
     for (const section of action_sections) {
         $(`#inquiry .actions .dropper.${section} form > button.fbt`).filter(function (i) {
             return $(this).text().includes("And stay on this report");
-        }).parent().toggle(this.checked);
+        }).parent().toggle(checked);
     }
-}).trigger('change');
+}
+$('#auto-next').on('change', update_stay_buttons);
+$('#inquiry .actions .dropper').on('mouseenter focusin', update_stay_buttons);
+update_stay_buttons();
 
 const observer_counter = new ResizeObserver(entries => {
     for (const entry of entries){

@@ -34,7 +34,7 @@ function unescapeHtml(string) {
 }
 
 // Firefox provides the "browser" API, Chrome only "chrome". Both return promises.
-const ext = globalThis.browser ?? globalThis.chrome;
+const ext = globalThis.browser?.storage ? globalThis.browser : globalThis.chrome;
 
 function getData(key) {
     return ext.storage.local.get(key);
